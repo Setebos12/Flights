@@ -1,4 +1,16 @@
-# ✈️ 
+# Temat projektu: System obsługi linii lotniczych
+## Modele bazy danych
+### Model pojęciowy
+Opis encji:
+**TO DO**
+<br>
+![Model pojęciowy](screeny/Logical.png)
+
+### Model relacyjny
+Zastosowana denormalizacja:
+**TO DO**
+<br>
+![Model relacyjny](screeny/Relational_1.png)
 
 ## 🛠️ Kroki Importu Schematu (DDL) z SQL
 
@@ -9,7 +21,7 @@ Aby rozpocząć pracę z istniejącym skryptem SQL, należy użyć modułu Data 
 ![Opis zdjęcia](screeny/1.png)
 
 ### 2. Wybór plików źródłowych
-W oknie **Select DDL Files** dodaj swój wygenerowany wcześniej plik `.sql` 
+W oknie **Select DDL Files** dodaj swój wygenerowany wcześniej plik `.sql`
 ![Opis zdjęcia](screeny/2.png)
 
 
