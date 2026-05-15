@@ -1,0 +1,42 @@
+services:
+  oracle-db:
+    image: container-registry.oracle.com/database/express:21.3.0-xe
+    platform: linux/amd64
+    container_name: oracle-flights
+    ports:
+      - "1521:1521"
+    env_file:
+      - .env
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+
+  db-init:
+    image: container-registry.oracle.com/database/express:21.3.0-xe
+    platform: linux/amd64
+    container_name: flights-db-init
+    depends_on:
+      oracle-db:
+        condition: service_started
+    env_file:
+      - .env
+    volumes:
+      - ./db/init:/init
+    command: bash -c "sleep 120 && sqlplus $${DB_USER}/$${DB_PASSWORD}@oracle-db:1521/XEPDB1 @/init/01_ddl.sql"
+    restart: "no"
+
+  app:
+    build: ./flights-app
+    container_name: flights-app
+    depends_on:
+      oracle-db:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      DB_URL: jdbc:oracle:thin:@oracle-db:1521/XEPDB1
+    stdin_open: true
+    tty: true
+    restart: on-failure
+
+volumes:
+  oracle-data:
