@@ -21,7 +21,10 @@ services:
       - .env
     volumes:
       - ./db/init:/init
-    command: bash -c "sleep 120 && sqlplus $${DB_USER}/$${DB_PASSWORD}@oracle-db:1521/XEPDB1 @/init/01_ddl.sql"
+    command: >
+      bash -c "sleep 120 
+      && sqlplus $${DB_USER}/$${DB_PASSWORD}@oracle-db:1521/XEPDB1 @/init/01_ddl.sql 
+      && sqlplus $${DB_USER}/$${DB_PASSWORD}@oracle-db:1521/XEPDB1 @/init/02_insert.sql"
     restart: "no"
 
   app:
