@@ -373,6 +373,184 @@ END;
 
 
 
+-- =============================================================
+-- CHECK, UNIQUE constraints
+-- =============================================================
+
+-- airlines
+ALTER TABLE airlines
+    ADD CONSTRAINT airlines_name_chk
+    CHECK (LENGTH(TRIM(name)) > 0);
+
+-- airports
+ALTER TABLE airports
+    ADD CONSTRAINT airports_code_upper_chk
+    CHECK (airport_code IS NULL OR airport_code = UPPER(airport_code));
+
+ALTER TABLE airports
+    ADD CONSTRAINT airports_code_uq
+    UNIQUE (airport_code);
+
+-- boarding_pass
+ALTER TABLE boarding_pass
+    ADD CONSTRAINT bp_dep_code_len_chk
+    CHECK (departure_airport_code IS NULL OR LENGTH(departure_airport_code) = 3);
+
+ALTER TABLE boarding_pass
+    ADD CONSTRAINT bp_arr_code_len_chk
+    CHECK (arrival_airport_code IS NULL OR LENGTH(arrival_airport_code) = 3);
+
+ALTER TABLE boarding_pass
+    ADD CONSTRAINT bp_different_airports_chk
+    CHECK (departure_airport_code != arrival_airport_code);
+
+ALTER TABLE boarding_pass
+    ADD CONSTRAINT bp_seat_row_chk
+    CHECK (seat_row IS NULL OR seat_row >= 1);
+
+ALTER TABLE boarding_pass
+    ADD CONSTRAINT bp_seat_col_chk
+    CHECK (seat_col IS NULL OR (seat_col >= 1 AND seat_col <= 9));
+
+-- currency
+ALTER TABLE currency
+    ADD CONSTRAINT currency_code_len_chk
+    CHECK (LENGTH(code) = 3);
+
+ALTER TABLE currency
+    ADD CONSTRAINT currency_code_upper_chk
+    CHECK (code = UPPER(code));
+
+ALTER TABLE currency
+    ADD CONSTRAINT currency_code_uq
+    UNIQUE (code);
+
+-- extra_services
+ALTER TABLE extra_services
+    ADD CONSTRAINT extra_services_price_chk
+    CHECK (price >= 0);
+
+-- flights
+ALTER TABLE flights
+    ADD CONSTRAINT flights_dates_chk
+    CHECK (arrival_date_time > departure_date_time);
+
+ALTER TABLE flights
+    ADD CONSTRAINT flights_price_chk
+    CHECK (price > 0);
+
+-- luggage
+ALTER TABLE luggage
+    ADD CONSTRAINT luggage_weight_chk
+    CHECK (weight > 0);
+
+ALTER TABLE luggage
+    ADD CONSTRAINT luggage_height_chk
+    CHECK (height IS NULL OR height > 0);
+
+ALTER TABLE luggage
+    ADD CONSTRAINT luggage_length_chk
+    CHECK (length IS NULL OR length > 0);
+
+ALTER TABLE luggage
+    ADD CONSTRAINT luggage_width_chk
+    CHECK (width IS NULL OR width > 0);
+
+-- passengers
+ALTER TABLE passengers
+    ADD CONSTRAINT passengers_first_name_chk
+    CHECK (LENGTH(TRIM(first_name)) > 0);
+
+ALTER TABLE passengers
+    ADD CONSTRAINT passengers_last_name_chk
+    CHECK (LENGTH(TRIM(last_name)) > 0);
+
+ALTER TABLE passengers
+    ADD CONSTRAINT passengers_phone_chk
+    CHECK (phone_number IS NULL OR
+           REGEXP_LIKE(phone_number, '^\+?[0-9 \-]{7,15}$'));
+
+-- payments
+ALTER TABLE payments
+    ADD CONSTRAINT payments_amount_chk
+    CHECK (payment_amount IS NULL OR payment_amount >= 0);
+
+ALTER TABLE payments
+    ADD CONSTRAINT payments_date_chk
+    CHECK (payment_date <= SYSDATE);
+
+-- planes
+ALTER TABLE planes
+    ADD CONSTRAINT planes_seat_count_chk
+    CHECK (seat_count > 0);
+
+ALTER TABLE planes
+    ADD CONSTRAINT planes_load_capacity_chk
+    CHECK (load_capacity IS NULL OR load_capacity > 0);
+
+ALTER TABLE planes
+    ADD CONSTRAINT planes_fuel_capacity_chk
+    CHECK (fuel_capacity IS NULL OR fuel_capacity > 0);
+    
+-- route_statistics
+ALTER TABLE route_statistics
+    ADD CONSTRAINT rs_month_chk
+    CHECK (month >= 1 AND month <= 12);
+
+ALTER TABLE route_statistics
+    ADD CONSTRAINT rs_passengers_chk
+    CHECK (total_passengers IS NULL OR total_passengers >= 0);
+
+ALTER TABLE route_statistics
+    ADD CONSTRAINT rs_revenue_chk
+    CHECK (total_revenue IS NULL OR total_revenue >= 0);
+
+-- routes
+ALTER TABLE routes
+    ADD CONSTRAINT routes_different_airports_chk
+    CHECK (origin_airport_id != destination_airport_id);
+
+ALTER TABLE routes
+    ADD CONSTRAINT routes_uq
+    UNIQUE (origin_airport_id, destination_airport_id);
+
+-- seats
+ALTER TABLE seats
+    ADD CONSTRAINT seats_row_chk
+    CHECK (row_nr >= 1);
+
+ALTER TABLE seats
+    ADD CONSTRAINT seats_col_chk
+    CHECK (column_nr >= 1 AND column_nr <= 9);
+
+-- time_zone
+ALTER TABLE time_zone
+    ADD CONSTRAINT tz_utc_diff_chk
+    CHECK (utc_difference >= -12 AND utc_difference <= 14);
+
+ALTER TABLE time_zone
+    ADD CONSTRAINT tz_code_len_chk
+    CHECK (LENGTH(TRIM(code)) >= 2);
+
+ALTER TABLE time_zone
+    ADD CONSTRAINT tz_code_uq
+    UNIQUE (code);
+
+-- users
+ALTER TABLE users
+    ADD CONSTRAINT users_email_chk
+    CHECK (REGEXP_LIKE(email_address,
+           '^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$'));
+
+ALTER TABLE users
+    ADD CONSTRAINT users_email_uq
+    UNIQUE (email_address);
+
+ALTER TABLE users
+    ADD CONSTRAINT users_password_len_chk
+    CHECK (LENGTH(password) >= 8);
+
+
 -- Oracle SQL Developer Data Modeler Summary Report: 
 -- 
 -- CREATE TABLE                            24
