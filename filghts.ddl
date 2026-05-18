@@ -95,7 +95,7 @@ CREATE TABLE flights (
 ALTER TABLE flights ADD CONSTRAINT flights_pk PRIMARY KEY ( id );
 
 CREATE TABLE luggage (
-    service_id              NUMBER(4) NOT NULL,
+    id              NUMBER(4) NOT NULL,
     weight          NUMBER(3, 1) NOT NULL,
     height          NUMBER(3),
     length          NUMBER(3),
@@ -285,7 +285,7 @@ ALTER TABLE flights
         REFERENCES routes ( id );
 
 ALTER TABLE luggage
-    ADD CONSTRAINT luggage_extra_services_fk FOREIGN KEY ( service_id )
+    ADD CONSTRAINT luggage_extra_services_fk FOREIGN KEY ( id )
         REFERENCES extra_services ( id );
 
 ALTER TABLE luggage
