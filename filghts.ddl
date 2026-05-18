@@ -95,12 +95,12 @@ CREATE TABLE flights (
 ALTER TABLE flights ADD CONSTRAINT flights_pk PRIMARY KEY ( id );
 
 CREATE TABLE luggage (
-    id     NUMBER(4) NOT NULL,
-    weight NUMBER(3, 1) NOT NULL,
-    height NUMBER(3),
-    length NUMBER(3),
-    width  NUMBER(3),
-    id2    NUMBER(5) NOT NULL
+    service_id              NUMBER(4) NOT NULL,
+    weight          NUMBER(3, 1) NOT NULL,
+    height          NUMBER(3),
+    length          NUMBER(3),
+    width           NUMBER(3),
+    passenger_id    NUMBER(5) NOT NULL
 );
 
 ALTER TABLE luggage ADD CONSTRAINT luggage_pk PRIMARY KEY ( id );
@@ -144,7 +144,7 @@ CREATE TABLE planes (
     seat_count    NUMBER(3) NOT NULL,
     load_capacity NUMBER(4),
     fuel_capacity NUMBER(5),
-    id            NUMBER(2) NOT NULL
+    airlines_id   NUMBER(2) NOT NULL
 );
 
 ALTER TABLE planes ADD CONSTRAINT planes_pk PRIMARY KEY ( serial_number );
@@ -285,11 +285,11 @@ ALTER TABLE flights
         REFERENCES routes ( id );
 
 ALTER TABLE luggage
-    ADD CONSTRAINT luggage_extra_services_fk FOREIGN KEY ( id )
+    ADD CONSTRAINT luggage_extra_services_fk FOREIGN KEY ( service_id )
         REFERENCES extra_services ( id );
 
 ALTER TABLE luggage
-    ADD CONSTRAINT luggage_passengers_fk FOREIGN KEY ( id2 )
+    ADD CONSTRAINT luggage_passengers_fk FOREIGN KEY ( passenger_id )
         REFERENCES passengers ( id );
 
 ALTER TABLE payments
@@ -301,7 +301,7 @@ ALTER TABLE payments
         REFERENCES payment_status ( payment_status_id );
 
 ALTER TABLE planes
-    ADD CONSTRAINT planes_airlines_fk FOREIGN KEY ( id )
+    ADD CONSTRAINT planes_airlines_fk FOREIGN KEY ( airlines_id )
         REFERENCES airlines ( id );
 
 ALTER TABLE reservations_extra_services
@@ -373,8 +373,8 @@ END;
 
 
 
--- Oracle SQL Developer Data Modeler Summary Report: 
--- 
+-- Oracle SQL Developer Data Modeler Summary Report:
+--
 -- CREATE TABLE                            24
 -- CREATE INDEX                             2
 -- ALTER TABLE                             52
@@ -403,15 +403,15 @@ END;
 -- CREATE SYNONYM                           0
 -- CREATE TABLESPACE                        0
 -- CREATE USER                              0
--- 
+--
 -- DROP TABLESPACE                          0
 -- DROP DATABASE                            0
--- 
+--
 -- REDACTION POLICY                         0
--- 
+--
 -- ORDS DROP SCHEMA                         0
 -- ORDS ENABLE SCHEMA                       0
 -- ORDS ENABLE OBJECT                       0
--- 
+--
 -- ERRORS                                   0
 -- WARNINGS                                 0
