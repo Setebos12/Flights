@@ -20,6 +20,8 @@ Pomocne, ponieważ przy locie chcemy od razu wyświetlić też informację o lin
 - Pre-join atrybutów
 1. Tabela Boarding Pass - duplikowane atrybuty: `departure_airport_code, arrival_airport_code, flight_departure_time, passenger_first_name, passenger_last_name, seat_row, seat_col`<br>
 Odpowiada temu, że chcemy, aby karta pokładowa była niezmienna w czasie. Dane kart pokładowych są szybkiej wyświetlane i mamy informację o stanie danych z przeszłości, ponieważ w tym przypadku taki nas interesuje.
+2. Tabela Flights - pre-join atrybutu `seat_count` z tabeli Planes<br>
+Utworzone, żeby przyspieszyć porównywanie z kolumną `booked_seats`.
 - Kolumny agregujące
 1. Tabela Flights - dodana kolumna `booked_seats`<br>
 Pomocna do częstego odczytywania stopnia zapełnienia lotu - może być to przydatne, żeby nie doprowadzić do przepełnienia lotu.
