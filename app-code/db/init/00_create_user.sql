@@ -1,0 +1,4 @@
+CREATE USER flights_user IDENTIFIED BY oracle;
+GRANT CONNECT, RESOURCE TO flights_user;
+GRANT UNLIMITED TABLESPACE TO flights_user;
+EXIT;
