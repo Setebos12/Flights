@@ -159,21 +159,21 @@ INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id)
 -- -------------------------------------------------------------
 -- 11. ROUTES
 -- -------------------------------------------------------------
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (1,  1,  4);   -- WAW -> BER
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (2,  1,  6);   -- WAW -> CDG
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (3,  1,  7);   -- WAW -> LHR
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (4,  1,  9);   -- WAW -> AMS
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (5,  1,  8);   -- WAW -> JFK
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (6,  4,  1);   -- BER -> WAW
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (7,  6,  1);   -- CDG -> WAW
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (8,  7,  1);   -- LHR -> WAW
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (9,  2,  6);   -- KRK -> CDG
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (10, 2,  4);   -- KRK -> BER
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (11, 3,  9);   -- GDN -> AMS
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (12, 6,  7);   -- CDG -> LHR
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (13, 7,  8);   -- LHR -> JFK
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (14, 9,  13);  -- AMS -> NRT
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (15, 1,  11);  -- WAW -> FCO
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (1,  1,  4); 
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (2,  1,  6); 
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (3,  1,  7); 
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (4,  1,  9); 
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (5,  1,  8); 
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (6,  4,  1); 
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (7,  6,  1);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (8,  7,  1); 
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (9,  2,  6);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (10, 2,  4);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (11, 3,  9);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (12, 6,  7);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (13, 7,  8);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (14, 9,  13); 
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (15, 1,  11);
 
 -- -------------------------------------------------------------
 -- 12. FLIGHTS
