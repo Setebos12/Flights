@@ -6,6 +6,7 @@ import com.example.flights_app.repository.FlightRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,9 +43,11 @@ public class FlightService {
     public List<FlightResponseDTO> searchFlights(
             String originCode,
             String destinationCode,
-            LocalDate date
+            LocalDate date,
+            BigDecimal minPrice,
+            BigDecimal maxPrice
     ){
-        List<Flight> flights = flightRepository.findFlights(originCode, destinationCode, date);
+        List<Flight> flights = flightRepository.findFlights(originCode, destinationCode, date, minPrice, maxPrice);
 
         return flights.stream()
                 .map(this::toDTO)

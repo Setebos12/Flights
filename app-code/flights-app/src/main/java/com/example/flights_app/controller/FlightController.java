@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -27,8 +28,11 @@ public class FlightController {
 
             @RequestParam(required = false)
             // ISO.DATE => "2026-05-24" -> LocalDate(2026, 5, 24)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice
     ) {
-        return flightService.searchFlights(originCode, destinationCode, date);
+        return flightService.searchFlights(originCode, destinationCode, date, minPrice, maxPrice);
     }
 }
