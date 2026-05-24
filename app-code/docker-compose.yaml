@@ -45,8 +45,19 @@ services:
       - .env
     environment:
       DB_URL: jdbc:oracle:thin:@oracle-db:1521/XEPDB1
+    ports:
+      - "8080:8080"
     stdin_open: true
     tty: true
+    restart: on-failure
+
+  frontend:
+    build: ./flights-frontend
+    container_name: flights-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app
     restart: on-failure
 
 volumes:

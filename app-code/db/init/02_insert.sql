@@ -1,26 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 INSERT INTO time_zone (id, code, utc_difference) VALUES (1,  'UTC',   0);
 INSERT INTO time_zone (id, code, utc_difference) VALUES (2,  'CET',   1);
 INSERT INTO time_zone (id, code, utc_difference) VALUES (3,  'EET',   2);
@@ -31,8 +9,6 @@ INSERT INTO time_zone (id, code, utc_difference) VALUES (7,  'MSK',   3);
 INSERT INTO time_zone (id, code, utc_difference) VALUES (8,  'IST',   5);
 INSERT INTO time_zone (id, code, utc_difference) VALUES (9,  'JST',   9);
 INSERT INTO time_zone (id, code, utc_difference) VALUES (10, 'AEST', 10);
-
-
 
 
 INSERT INTO country (id, name, time_zone_id) VALUES (1,  'Poland',         2);
@@ -87,11 +63,11 @@ INSERT INTO airports (id, airport_name, airport_code, city_id) VALUES (15, 'Wroc
 
 
 
-INSERT INTO currency (id, code) VALUES (1, 'PLN');
-INSERT INTO currency (id, code) VALUES (2, 'EUR');
-INSERT INTO currency (id, code) VALUES (3, 'GBP');
-INSERT INTO currency (id, code) VALUES (4, 'USD');
-INSERT INTO currency (id, code) VALUES (5, 'JPY');
+INSERT INTO currency (code) VALUES ('PLN');
+INSERT INTO currency (code) VALUES ('EUR');
+INSERT INTO currency (code) VALUES ('GBP');
+INSERT INTO currency (code) VALUES ('USD');
+INSERT INTO currency (code) VALUES ('JPY');
 
 
 
@@ -205,70 +181,70 @@ INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id)
 
 
 
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (1,  1,  4);  
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (2,  1,  6);  
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (3,  1,  7);  
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (4,  1,  9);  
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (5,  1,  8);  
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (6,  4,  1);  
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (7,  6,  1);  
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (8,  7,  1);  
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (9,  2,  6);  
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (10, 2,  4);  
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (11, 3,  9);  
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (12, 6,  7);  
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (13, 7,  8);  
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (14, 9,  13); 
-INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (15, 1,  11); 
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (1,  1,  4);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (2,  1,  6);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (3,  1,  7);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (4,  1,  9);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (5,  1,  8);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (6,  4,  1);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (7,  6,  1);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (8,  7,  1);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (9,  2,  6);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (10, 2,  4);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (11, 3,  9);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (12, 6,  7);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (13, 7,  8);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (14, 9,  13);
+INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (15, 1,  11);
 
 
 
 
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (1,  TIMESTAMP '2026-06-01 06:00:00 +02:00', TIMESTAMP '2026-06-01 07:45:00 +02:00', 1,  1001, 299.00,  2, 1);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (1,  TIMESTAMP '2026-06-01 06:00:00 +02:00', TIMESTAMP '2026-06-01 07:45:00 +02:00', 1,  1001, 299.00,  'EUR', 1);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (2,  TIMESTAMP '2026-06-01 10:30:00 +02:00', TIMESTAMP '2026-06-01 12:45:00 +02:00', 2,  1002, 349.00,  2, 1);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (2,  TIMESTAMP '2026-06-01 10:30:00 +02:00', TIMESTAMP '2026-06-01 12:45:00 +02:00', 2,  1002, 349.00,  'EUR', 1);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (3,  TIMESTAMP '2026-06-02 08:00:00 +02:00', TIMESTAMP '2026-06-02 10:15:00 +01:00', 3,  1001, 420.00,  3, 1);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (3,  TIMESTAMP '2026-06-02 08:00:00 +02:00', TIMESTAMP '2026-06-02 10:15:00 +01:00', 3,  1001, 420.00,  'GBP', 1);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (4,  TIMESTAMP '2026-06-03 14:00:00 +02:00', TIMESTAMP '2026-06-03 16:00:00 +02:00', 4,  1002, 279.00,  2, 7);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (4,  TIMESTAMP '2026-06-03 14:00:00 +02:00', TIMESTAMP '2026-06-03 16:00:00 +02:00', 4,  1002, 279.00,  'USD', 7);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (5,  TIMESTAMP '2026-06-05 21:00:00 +02:00', TIMESTAMP '2026-06-06 00:30:00 -05:00', 5,  1003, 1250.00, 4, 1);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (5,  TIMESTAMP '2026-06-05 21:00:00 +02:00', TIMESTAMP '2026-06-06 00:30:00 -05:00', 5,  1003, 1250.00,  'USD', 1);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (6,  TIMESTAMP '2026-06-07 09:00:00 +02:00', TIMESTAMP '2026-06-07 10:50:00 +02:00', 6,  1004, 310.00,  2, 2);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (6,  TIMESTAMP '2026-06-07 09:00:00 +02:00', TIMESTAMP '2026-06-07 10:50:00 +02:00', 6,  1004, 310.00,  'EUR', 2);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (7,  TIMESTAMP '2026-06-08 13:00:00 +02:00', TIMESTAMP '2026-06-08 15:20:00 +02:00', 7,  1005, 380.00,  2, 3);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (7,  TIMESTAMP '2026-06-08 13:00:00 +02:00', TIMESTAMP '2026-06-08 15:20:00 +02:00', 7,  1005, 380.00,  'EUR', 3);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (8,  TIMESTAMP '2026-06-10 07:30:00 +01:00', TIMESTAMP '2026-06-10 11:45:00 +02:00', 8,  1002, 395.00,  2, 4);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (8,  TIMESTAMP '2026-06-10 07:30:00 +01:00', TIMESTAMP '2026-06-10 11:45:00 +02:00', 8,  1002, 395.00,  'EUR', 4);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (9,  TIMESTAMP '2026-06-12 06:15:00 +02:00', TIMESTAMP '2026-06-12 09:00:00 +02:00', 9,  1007, 220.00,  2, 1);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (9,  TIMESTAMP '2026-06-12 06:15:00 +02:00', TIMESTAMP '2026-06-12 09:00:00 +02:00', 9,  1007, 220.00,  'EUR', 1);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (10, TIMESTAMP '2026-06-15 16:00:00 +02:00', TIMESTAMP '2026-06-15 17:45:00 +02:00', 10, 1008, 189.00,  2, 6);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (10, TIMESTAMP '2026-06-15 16:00:00 +02:00', TIMESTAMP '2026-06-15 17:45:00 +02:00', 10, 1008, 189.00,  'EUR', 6);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (11, TIMESTAMP '2026-06-20 11:00:00 +02:00', TIMESTAMP '2026-06-20 13:30:00 +02:00', 11, 1009, 259.00,  2, 7);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (11, TIMESTAMP '2026-06-20 11:00:00 +02:00', TIMESTAMP '2026-06-20 13:30:00 +02:00', 11, 1009, 259.00,  'EUR', 7);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (12, TIMESTAMP '2026-06-22 08:45:00 +02:00', TIMESTAMP '2026-06-22 09:45:00 +01:00', 12, 1002, 199.00,  2, 3);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (12, TIMESTAMP '2026-06-22 08:45:00 +02:00', TIMESTAMP '2026-06-22 09:45:00 +01:00', 12, 1002, 199.00,  'EUR', 3);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (13, TIMESTAMP '2026-06-25 14:30:00 +01:00', TIMESTAMP '2026-06-25 17:45:00 -05:00', 13, 1006, 890.00,  3, 4);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (13, TIMESTAMP '2026-06-25 14:30:00 +01:00', TIMESTAMP '2026-06-25 17:45:00 -05:00', 13, 1006, 890.00,  'GBP', 4);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (14, TIMESTAMP '2026-07-01 22:00:00 +02:00', TIMESTAMP '2026-07-02 17:30:00 +09:00', 14, 1010, 1450.00, 2, 5);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (14, TIMESTAMP '2026-07-01 22:00:00 +02:00', TIMESTAMP '2026-07-02 17:30:00 +09:00', 14, 1010, 1450.00,  'EUR', 5);
 
-INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_id, airlines_id)
-    VALUES (15, TIMESTAMP '2026-07-04 07:00:00 +02:00', TIMESTAMP '2026-07-04 09:15:00 +02:00', 15, 1001, 340.00,  2, 1);
+INSERT INTO flights (id, departure_date_time, arrival_date_time, routes_id, serial_number, price, currency_code, airlines_id)
+VALUES (15, TIMESTAMP '2026-07-04 07:00:00 +02:00', TIMESTAMP '2026-07-04 09:15:00 +02:00', 15, 1001, 340.00,  'EUR', 1);
 
 
 
@@ -293,16 +269,16 @@ INSERT INTO extra_services (id, name, price) VALUES (15, 'Seat Selection',      
 
 
 
-INSERT INTO users (id, email_address, password) VALUES (1,  'jan.kowalski@email.pl',       'Haslo1234');
-INSERT INTO users (id, email_address, password) VALUES (2,  'anna.nowak@email.pl',         'Haslo5678');
-INSERT INTO users (id, email_address, password) VALUES (3,  'piotr.wisniewski@email.pl',   'Secure99!');
-INSERT INTO users (id, email_address, password) VALUES (4,  'maria.kowalczyk@email.pl',    'Pass1234!');
-INSERT INTO users (id, email_address, password) VALUES (5,  'tomasz.lewandowski@email.pl', 'TomPass77');
-INSERT INTO users (id, email_address, password) VALUES (6,  'katarzyna.wojcik@email.pl',   'KatPass88');
-INSERT INTO users (id, email_address, password) VALUES (7,  'marek.kaminski@email.pl',     'Marek123!');
-INSERT INTO users (id, email_address, password) VALUES (8,  'agnieszka.zielinska@email.pl','Agn12345');
-INSERT INTO users (id, email_address, password) VALUES (9,  'krzysztof.szymanski@email.pl','KrzPass55');
-INSERT INTO users (id, email_address, password) VALUES (10, 'barbara.wozniak@email.pl',    'Barbara99');
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (1,  'jan.kowalski@email.pl',       'Haslo1234', 1);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (2,  'anna.nowak@email.pl',         'Haslo5678', 2);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (3,  'piotr.wisniewski@email.pl',   'Secure99!', 3);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (4,  'maria.kowalczyk@email.pl',    'Pass1234!', 4);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (5,  'tomasz.lewandowski@email.pl', 'TomPass77', 5);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (6,  'katarzyna.wojcik@email.pl',   'KatPass88', 6);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (7,  'marek.kaminski@email.pl',     'Marek123!', 7);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (8,  'agnieszka.zielinska@email.pl','Agn12345', 8);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (9,  'krzysztof.szymanski@email.pl','KrzPass55', 9);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (10, 'barbara.wozniak@email.pl',    'Barbara99', 10);
 
 
 
@@ -338,21 +314,21 @@ INSERT INTO payment_status (payment_status_id, description) VALUES (5, 'Partiall
 
 
 
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (1,  DATE '2026-05-01', 2,  598.00,  2);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (2,  DATE '2026-05-02', 2,  349.00,  2);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (3,  DATE '2026-05-03', 2,  840.00,  2);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (4,  DATE '2026-05-05', 2,  279.00,  2);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (5,  DATE '2026-05-06', 2, 2500.00,  4);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (6,  DATE '2026-05-07', 1,  310.00,  2);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (7,  DATE '2026-05-08', 2,  420.00,  2);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (8,  DATE '2026-05-09', 3,  395.00,  2);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (9,  DATE '2026-05-10', 2,  220.00,  2);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (10, DATE '2026-05-11', 4,  189.00,  2);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (11, DATE '2026-05-12', 2,  259.00,  2);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (12, DATE '2026-05-13', 2,  199.00,  2);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (13, DATE '2026-05-14', 2,  890.00,  3);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (14, DATE '2026-05-15', 1, 1450.00,  2);
-INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_id) VALUES (15, DATE '2026-05-16', 2,  340.00,  2);
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (1,  DATE '2026-05-01', 2,  598.00,  'EUR');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (2,  DATE '2026-05-02', 2,  349.00,  'EUR');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (3,  DATE '2026-05-03', 2,  840.00,  'EUR');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (4,  DATE '2026-05-05', 2,  279.00,  'EUR');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (5,  DATE '2026-05-06', 2, 2500.00,  'USD');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (6,  DATE '2026-05-07', 1,  310.00,  'EUR');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (7,  DATE '2026-05-08', 2,  420.00,  'EUR');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (8,  DATE '2026-05-09', 3,  395.00,  'EUR');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (9,  DATE '2026-05-10', 2,  220.00,  'EUR');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (10, DATE '2026-05-11', 4,  189.00,  'EUR');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (11, DATE '2026-05-12', 2,  259.00,  'EUR');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (12, DATE '2026-05-13', 2,  199.00,  'EUR');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (13, DATE '2026-05-14', 2,  890.00,  'GBP');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (14, DATE '2026-05-15', 1, 1450.00,  'EUR');
+INSERT INTO payments (id, payment_date, payment_status_id, payment_amount, currency_code) VALUES (15, DATE '2026-05-16', 2,  340.00,  'EUR');
 
 
 
@@ -417,20 +393,20 @@ INSERT INTO reservations_payments (reservations_id, payments_id) VALUES (15, 15)
 
 
 
-INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (1,  1);   
-INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (1,  3);   
+INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (1,  1);
+INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (1,  3);
 INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (2,  3);
 INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (3,  1);
-INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (3,  8);   
-INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (4,  15);  
-INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (5,  4);   
-INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (5,  11);  
-INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (6,  10);  
-INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (7,  5);   
-INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (8,  6);   
-INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (9,  2);   
+INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (3,  8);
+INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (4,  15);
+INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (5,  4);
+INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (5,  11);
+INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (6,  10);
+INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (7,  5);
+INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (8,  6);
+INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (9,  2);
 INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (10, 3);
-INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (13, 11);  
+INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (13, 11);
 INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (14, 11);
 INSERT INTO reservations_extra_services (reservations_id, extra_services_id) VALUES (14, 4);
 
@@ -456,41 +432,41 @@ INSERT INTO luggage (id, weight, height, length, width, passenger_id) VALUES (10
 
 
 INSERT INTO boarding_pass
-    (reservations_id, seats_id, serial_number, flights_id, departure_airport_code, arrival_airport_code,
-     flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
-VALUES (1,  5,  1001, 1,  'WAW', 'BER', TIMESTAMP '2026-06-01 06:00:00 +02:00', 'Jan',       'Kowalski',   2, 1);
+(reservations_id, seats_id, serial_number, departure_airport_code, arrival_airport_code,
+ flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
+VALUES (1,  5,  1001, 'WAW', 'BER', TIMESTAMP '2026-06-01 06:00:00 +02:00', 'Jan',       'Kowalski',   2, 1);
 
 INSERT INTO boarding_pass
-    (reservations_id, seats_id, serial_number, flights_id, departure_airport_code, arrival_airport_code,
-     flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
-VALUES (1,  6,  1001, 1,  'WAW', 'BER', TIMESTAMP '2026-06-01 06:00:00 +02:00', 'Zofia',     'Kowalska',   2, 2);
+(reservations_id, seats_id, serial_number, departure_airport_code, arrival_airport_code,
+ flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
+VALUES (1,  6,  1001, 'WAW', 'BER', TIMESTAMP '2026-06-01 06:00:00 +02:00', 'Zofia',     'Kowalska',   2, 2);
 
 INSERT INTO boarding_pass
-    (reservations_id, seats_id, serial_number, flights_id, departure_airport_code, arrival_airport_code,
-     flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
-VALUES (2,  21, 1002, 2,  'WAW', 'CDG', TIMESTAMP '2026-06-01 10:30:00 +02:00', 'Anna',      'Nowak',      2, 1);
+(reservations_id, seats_id, serial_number, departure_airport_code, arrival_airport_code,
+ flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
+VALUES (2,  21, 1002, 'WAW', 'CDG', TIMESTAMP '2026-06-01 10:30:00 +02:00', 'Anna',      'Nowak',      2, 1);
 
 INSERT INTO boarding_pass
-    (reservations_id, seats_id, serial_number, flights_id, departure_airport_code, arrival_airport_code,
-     flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
-VALUES (3,  7,  1001, 3,  'WAW', 'LHR', TIMESTAMP '2026-06-02 08:00:00 +02:00', 'Piotr',     'Wisniewski', 2, 3);
+(reservations_id, seats_id, serial_number, departure_airport_code, arrival_airport_code,
+ flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
+VALUES (3,  7,  1001, 'WAW', 'LHR', TIMESTAMP '2026-06-02 08:00:00 +02:00', 'Piotr',     'Wisniewski', 2, 3);
 
 INSERT INTO boarding_pass
-    (reservations_id, seats_id, serial_number, flights_id, departure_airport_code, arrival_airport_code,
-     flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
-VALUES (4,  22, 1002, 4,  'WAW', 'AMS', TIMESTAMP '2026-06-03 14:00:00 +02:00', 'Maria',     'Kowalczyk',  2, 2);
-
-
-INSERT INTO boarding_pass
-    (reservations_id, seats_id, serial_number, flights_id, departure_airport_code, arrival_airport_code,
-     flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
-VALUES (9,  31, 1007, 9,  'KRK', 'CDG', TIMESTAMP '2026-06-12 06:15:00 +02:00', 'Krzysztof', 'Szymanski',  2, 1);
+(reservations_id, seats_id, serial_number, departure_airport_code, arrival_airport_code,
+ flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
+VALUES (4,  22, 1002, 'WAW', 'AMS', TIMESTAMP '2026-06-03 14:00:00 +02:00', 'Maria',     'Kowalczyk',  2, 2);
 
 
 INSERT INTO boarding_pass
-    (reservations_id, seats_id, serial_number, flights_id, departure_airport_code, arrival_airport_code,
-     flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
-VALUES (11, 43, 1009, 11, 'GDN', 'AMS', TIMESTAMP '2026-06-20 11:00:00 +02:00', 'Jan',       'Kowalski',   2, 3);
+(reservations_id, seats_id, serial_number, departure_airport_code, arrival_airport_code,
+ flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
+VALUES (9,  31, 1007,  'KRK', 'CDG', TIMESTAMP '2026-06-12 06:15:00 +02:00', 'Krzysztof', 'Szymanski',  2, 1);
+
+
+INSERT INTO boarding_pass
+(reservations_id, seats_id, serial_number, departure_airport_code, arrival_airport_code,
+ flight_departure_date_time, passenger_first_name, passenger_last_name, seat_row, seat_col)
+VALUES (11, 43, 1009, 'GDN', 'AMS', TIMESTAMP '2026-06-20 11:00:00 +02:00', 'Jan',       'Kowalski',   2, 3);
 
 
 
