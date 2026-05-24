@@ -35,8 +35,9 @@ public class Flight {
     @JoinColumn(name = "AIRLINES_ID")
     private Airline airline;
 
-    @Column(name = "CURRENCY_CODE")
-    private String currencyCode;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CURRENCY_ID")
+    private Currency currency;
 
     @Column(name = "BOOKED_SEATS_COUNT")
     private Integer bookedSeatsCount;
