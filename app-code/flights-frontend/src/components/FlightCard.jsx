@@ -1,9 +1,12 @@
 export default function FlightCard({ flight }) {
   const formatTime = (datetime) => {
-    return new Date(datetime).toLocaleTimeString("pl-PL", {
-      hour: "2-digit",
-      minute: "2-digit"
-    })
+    return datetime.substring(11, 16)
+  }
+
+  const formatDate = (datetime) => {
+    const d = datetime.substring(0, 10)
+    const [year, month, day] = d.split("-")
+    return `${day}.${month}.${year}`
   }
 
   const calcDuration = (departure, arrival) => {
@@ -13,25 +16,30 @@ export default function FlightCard({ flight }) {
     return `${hours}h ${minutes}m`
   }
 
-  const formatDate = (datetime) => {
-    return new Date(datetime).toLocaleDateString("pl-PL", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric"
-    })
+  const getOffsetDiff = (departure, arrival) => {
+    const getOffset = (dt) => {
+      const match = dt.match(/([+-])(\d{2}):(\d{2})$/)
+      if (!match) return 0
+      const sign = match[1] === "+" ? 1 : -1
+      return sign * parseInt(match[2])
+    }
+    const diff = getOffset(arrival) - getOffset(departure)
+    if (diff === 0) return ""
+    return diff > 0 ? `(+${diff})` : `(${diff})`
   }
 
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex items-center gap-4">
 
-      <div className="w-12 h-12 rounded-lg bg-blue-50 dark:bg-slate-700 flex items-center justify-center text-xs font-medium text-blue-700 dark:text-blue-300 text-center leading-tight shrink-0">
-        {flight.airlineName.split(" ").map(w => w[0]).join("").slice(0, 3)}
+      <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-slate-700 flex items-center justify-center text-sm font-bold text-blue-700 dark:text-blue-300">
+        {flight.airlineName.slice(0, 3).toUpperCase()}
       </div>
 
       <div className="flex items-center gap-4 flex-1">
         <div className="text-center">
           <div className="text-xl font-medium text-slate-800 dark:text-white">{flight.originAirportCode}</div>
           <div className="text-sm text-slate-500">{formatTime(flight.departureDatetime)}</div>
+          <div className="text-xs text-slate-400">{formatDate(flight.departureDatetime)}</div>
           <div className="text-xs text-slate-400">{flight.originCity}</div>
         </div>
 
@@ -47,7 +55,13 @@ export default function FlightCard({ flight }) {
 
         <div className="text-center">
           <div className="text-xl font-medium text-slate-800 dark:text-white">{flight.destinationAirportCode}</div>
-          <div className="text-sm text-slate-500">{formatTime(flight.arrivalDatetime)}</div>
+          <div className="text-sm text-slate-500">
+            {formatTime(flight.arrivalDatetime)}
+            <span className="text-xs text-blue-400 ml-1">
+              {getOffsetDiff(flight.departureDatetime, flight.arrivalDatetime)}
+            </span>
+          </div>
+          <div className="text-xs text-slate-400">{formatDate(flight.arrivalDatetime)}</div>
           <div className="text-xs text-slate-400">{flight.destinationCity}</div>
         </div>
       </div>
@@ -71,12 +85,6 @@ export default function FlightCard({ flight }) {
         </button>
       </div>
 
-      <div className="text-center">
-        <div className="text-xl font-medium text-slate-800 dark:text-white">{flight.originAirportCode}</div>
-        <div className="text-sm text-slate-500">{formatTime(flight.departureDatetime)}</div>
-        <div className="text-xs text-slate-400">{formatDate(flight.departureDatetime)}</div>
-        <div className="text-xs text-slate-400">{flight.originCity}</div>
-      </div>
     </div>
   )
 }
