@@ -20,10 +20,15 @@ export default function SearchForm({ onSearch }) {
   }
 
   return (
-    <div className="bg-blue-900 dark:bg-slate-950 px-4 py-10">
-      <div className="max-w-4xl mx-auto">
+    <div className="bg-blue-950 dark:bg-slate-950 px-4 py-10 relative overflow-hidden">
+
+      <div className="absolute right-0 top-0 bottom-0 flex items-center pr-16 pointer-events-none select-none">
+        <span className="text-white opacity-5 text-[200px] leading-none">✈</span>
+      </div>
+
+      <div className="max-w-4xl mx-auto relative z-10">
         <h1 className="text-white text-3xl font-medium mb-2">Find your next flight</h1>
-        <p className="text-blue-300 text-sm mb-6">Search hundreds of routes and get the best prices</p>
+        <p className="text-blue-300 text-sm mb-8">Search hundreds of routes and get the best prices</p>
 
         <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 rounded-xl p-4 grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
           <div>

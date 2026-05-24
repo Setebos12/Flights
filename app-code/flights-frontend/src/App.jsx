@@ -22,12 +22,18 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-900">
-      <SearchForm onSearch={searchFlights} />
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        {loading && <p className="text-slate-500">Searching...</p>}
-        <FlightList flights={flights} />
+      <div className="min-h-screen bg-slate-100 dark:bg-slate-900">
+        <nav className="bg-blue-950 dark:bg-slate-950 px-6 py-3 flex items-center gap-2">
+          <span className="text-white text-2xl">✈</span>
+          <span className="text-white font-medium tracking-wide text-lg">SkySearch</span>
+        </nav>
+
+        <SearchForm onSearch={searchFlights} />
+
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          {loading && <p className="text-slate-500 text-center animate-pulse">Searching...</p>}
+          <FlightList flights={flights} />
+        </div>
       </div>
-    </div>
-  )
+    )
 }
