@@ -36,7 +36,7 @@ public class Flight {
     private Airline airline;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CURRENCY_ID")
+    @JoinColumn(name = "CURRENCY_CODE", referencedColumnName = "CODE") // inne nazwy w kolumnach tabel
     private Currency currency;
 
     @Column(name = "BOOKED_SEATS_COUNT")
