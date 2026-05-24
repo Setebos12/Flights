@@ -47,22 +47,13 @@ ALTER TABLE city ADD CONSTRAINT city_country_fk FOREIGN KEY (country_id) REFEREN
 
 
 CREATE TABLE currency (
-    id   NUMBER(3)   NOT NULL,
     code VARCHAR2(3) NOT NULL
 );
-ALTER TABLE currency ADD CONSTRAINT currency_pk       PRIMARY KEY (id);
+ALTER TABLE currency ADD CONSTRAINT currency_pk       PRIMARY KEY (code);
 ALTER TABLE currency ADD CONSTRAINT currency_code_uq  UNIQUE (code);
 ALTER TABLE currency ADD CONSTRAINT currency_code_len_chk   CHECK (LENGTH(code) = 3);
 ALTER TABLE currency ADD CONSTRAINT currency_code_upper_chk CHECK (code = UPPER(code));
 
-CREATE SEQUENCE currency_seq START WITH 1 NOCACHE ORDER;
-CREATE OR REPLACE TRIGGER currency_bir
-    BEFORE INSERT ON currency FOR EACH ROW
-    WHEN (new.id IS NULL)
-BEGIN
-    :new.id := currency_seq.nextval;
-END;
-/
 
 
 CREATE TABLE payment_status (
@@ -193,7 +184,7 @@ CREATE TABLE flights (
     serial_number       NUMBER(4)                NOT NULL,
     price               NUMBER(7, 2)             NOT NULL,
     airlines_id         NUMBER(2)                NOT NULL,
-    currency_id         NUMBER(3)                NOT NULL,   
+    currency_code       VARCHAR2(3)              NOT NULL,
     booked_seats_count  NUMBER(3),
     p_seat_count        NUMBER(3)
 );
@@ -201,7 +192,7 @@ ALTER TABLE flights ADD CONSTRAINT flights_pk          PRIMARY KEY (id);
 ALTER TABLE flights ADD CONSTRAINT flights_routes_fk   FOREIGN KEY (routes_id)     REFERENCES routes (id);
 ALTER TABLE flights ADD CONSTRAINT flights_planes_fk   FOREIGN KEY (serial_number) REFERENCES planes (serial_number);
 ALTER TABLE flights ADD CONSTRAINT flights_airlines_fk FOREIGN KEY (airlines_id)   REFERENCES airlines (id);
-ALTER TABLE flights ADD CONSTRAINT flights_currency_fk FOREIGN KEY (currency_id)   REFERENCES currency (id);  
+ALTER TABLE flights ADD CONSTRAINT flights_currency_fk FOREIGN KEY (currency_code) REFERENCES currency (code);
 ALTER TABLE flights ADD CONSTRAINT flights_dates_chk   CHECK (arrival_date_time > departure_date_time);
 ALTER TABLE flights ADD CONSTRAINT flights_price_chk   CHECK (price > 0);
 
@@ -215,7 +206,8 @@ ALTER TABLE flights ADD CONSTRAINT flights_price_chk   CHECK (price > 0);
 CREATE TABLE users (
     id            NUMBER(4)    NOT NULL,
     email_address VARCHAR2(128) NOT NULL,
-    password      VARCHAR2(128) NOT NULL 
+    password      VARCHAR2(128) NOT NULL,
+    passengers_id NUMBER(5)
 );
 
 ALTER TABLE users ADD CONSTRAINT users_pk              PRIMARY KEY (id);
@@ -231,7 +223,7 @@ CREATE TABLE passengers (
     last_name               VARCHAR2(128) NOT NULL,
     phone_number            VARCHAR2(15),
     other_passenger_details CLOB,
-    user_id                 NUMBER(4)           
+    user_id                 NUMBER(4)
 );
 CREATE UNIQUE INDEX passengers_user_idx ON passengers (user_id ASC);
 ALTER TABLE passengers ADD CONSTRAINT passengers_pk           PRIMARY KEY (id);
@@ -291,11 +283,11 @@ CREATE TABLE payments (
     payment_date      DATE        NOT NULL,
     payment_status_id NUMBER      NOT NULL,
     payment_amount    NUMBER(9,2),
-    currency_id       NUMBER(3)   NOT NULL   
+    currency_code     VARCHAR2(3)   NOT NULL
 );
 ALTER TABLE payments ADD CONSTRAINT payments_pk             PRIMARY KEY (id);
 ALTER TABLE payments ADD CONSTRAINT payments_payment_status_fk FOREIGN KEY (payment_status_id) REFERENCES payment_status (payment_status_id);
-ALTER TABLE payments ADD CONSTRAINT payments_currency_fk    FOREIGN KEY (currency_id)       REFERENCES currency (id);  
+ALTER TABLE payments ADD CONSTRAINT payments_currency_fk    FOREIGN KEY (currency_code)       REFERENCES currency (code);
 ALTER TABLE payments ADD CONSTRAINT payments_amount_chk     CHECK (payment_amount IS NULL OR payment_amount >= 0);
 
 
@@ -326,7 +318,6 @@ CREATE TABLE boarding_pass (
     reservations_id            NUMBER(5) NOT NULL,
     seats_id                   NUMBER(5) NOT NULL,
     serial_number              NUMBER(4) NOT NULL,
-    flights_id                 NUMBER(4) NOT NULL,   
     departure_airport_code     VARCHAR2(3),
     arrival_airport_code       VARCHAR2(3),
     flight_departure_date_time TIMESTAMP WITH TIME ZONE,
@@ -338,7 +329,6 @@ CREATE TABLE boarding_pass (
 ALTER TABLE boarding_pass ADD CONSTRAINT boarding_pass_pk             PRIMARY KEY (seats_id, serial_number, reservations_id);
 ALTER TABLE boarding_pass ADD CONSTRAINT boarding_pass_reservations_fk FOREIGN KEY (reservations_id) REFERENCES reservations (id);
 ALTER TABLE boarding_pass ADD CONSTRAINT boarding_pass_seats_fk       FOREIGN KEY (seats_id, serial_number) REFERENCES seats (id, serial_number);
-ALTER TABLE boarding_pass ADD CONSTRAINT boarding_pass_flights_fk     FOREIGN KEY (flights_id) REFERENCES flights (id);  
 ALTER TABLE boarding_pass ADD CONSTRAINT bp_dep_code_len_chk          CHECK (departure_airport_code IS NULL OR LENGTH(departure_airport_code) = 3);
 ALTER TABLE boarding_pass ADD CONSTRAINT bp_arr_code_len_chk          CHECK (arrival_airport_code IS NULL OR LENGTH(arrival_airport_code) = 3);
 ALTER TABLE boarding_pass ADD CONSTRAINT bp_different_airports_chk    CHECK (departure_airport_code != arrival_airport_code);
