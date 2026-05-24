@@ -9,9 +9,6 @@ import lombok.Data;
 public class Currency {
 
     @Id
-    @Column(name = "ID")
-    private Long id;
-
     @Column(name = "CODE")
     private String code;
 }

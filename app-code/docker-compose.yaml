@@ -45,6 +45,8 @@ services:
       - .env
     environment:
       DB_URL: jdbc:oracle:thin:@oracle-db:1521/XEPDB1
+    ports:
+      - "8080:8080"
     stdin_open: true
     tty: true
     restart: on-failure
