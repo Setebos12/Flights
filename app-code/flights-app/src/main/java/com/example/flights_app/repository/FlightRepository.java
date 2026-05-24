@@ -11,21 +11,18 @@ import java.util.List;
 
 public interface FlightRepository extends JpaRepository<Flight, Long> {
 
-    @Query("""
-        SELECT f FROM Flight f
-        JOIN f.route r
-        JOIN r.originAirport oa
-        JOIN r.destinationAirport da
-        WHERE (:originCode IS NULL OR oa.airportCode = :originCode)
-        AND (:destinationCode IS NULL OR da.airportCode = :destinationCode)
-        AND (:date IS NULL OR
-            (EXTRACT(YEAR FROM f.departureDatetime) = YEAR(:date)
-            AND EXTRACT(MONTH FROM f.departureDatetime) = MONTH(:date)
-            AND EXTRACT(DAY FROM f.departureDatetime) = DAY(:date)))
-        AND (:minPrice IS NULL OR f.price >= :minPrice)
-        AND (:maxPrice IS NULL OR f.price <= :maxPrice)
-        ORDER BY f.departureDatetime ASC\s
-    """)
+    @Query(value = """
+    SELECT f.* FROM flights f
+    JOIN routes r ON r.id = f.routes_id
+    JOIN airports oa ON oa.id = r.origin_airport_id
+    JOIN airports da ON da.id = r.destination_airport_id
+    WHERE (:originCode IS NULL OR oa.airport_code = :originCode)
+    AND (:destinationCode IS NULL OR da.airport_code = :destinationCode)
+    AND (:date IS NULL OR TRUNC(f.departure_date_time) = :date)
+    AND (:minPrice IS NULL OR f.price >= :minPrice)
+    AND (:maxPrice IS NULL OR f.price <= :maxPrice)
+    ORDER BY f.departure_date_time ASC
+""", nativeQuery = true)
     // cast na date bez godziny i strefy czasowej
     // opcja sortowania po kwocie
     List<Flight> findFlights(
