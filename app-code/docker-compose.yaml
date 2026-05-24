@@ -51,5 +51,14 @@ services:
     tty: true
     restart: on-failure
 
+  frontend:
+    build: ./flights-frontend
+    container_name: flights-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app
+    restart: on-failure
+
 volumes:
   oracle-data:
