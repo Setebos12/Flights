@@ -1,24 +1,14 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ALTER TRIGGER payment_calculation DISABLE;
+ALTER TRIGGER prejoin_payments DISABLE;
+ALTER TRIGGER prejoin_flights DISABLE;
+ALTER TRIGGER prejoin_flights_currency DISABLE;
+ALTER TRIGGER prejoin_flights_seat_count DISABLE;
+ALTER TRIGGER prejoin_boarding_pass DISABLE;
+ALTER TRIGGER flights_booked_seats_I DISABLE;
+ALTER TRIGGER flights_booked_seats_D DISABLE;
+ALTER TRIGGER flights_booked_seats_U DISABLE;
+ALTER TRIGGER route_statistics_count_passengers_I DISABLE;
+ALTER TRIGGER route_statistics_count_revenue_I DISABLE;
 
 
 INSERT INTO time_zone (id, code, utc_difference) VALUES (1,  'UTC',   0);
@@ -507,3 +497,15 @@ INSERT INTO route_statistics (routes_id, year, month, total_passengers, total_re
 INSERT INTO route_statistics (routes_id, year, month, total_passengers, total_revenue) VALUES (13, 2025, 1,  5412,  4823456.75);
 
 COMMIT;
+
+ALTER TRIGGER payment_calculation ENABLE;
+ALTER TRIGGER prejoin_payments ENABLE;
+ALTER TRIGGER prejoin_flights ENABLE;
+ALTER TRIGGER prejoin_flights_currency ENABLE;
+ALTER TRIGGER prejoin_flights_seat_count ENABLE;
+ALTER TRIGGER prejoin_boarding_pass ENABLE;
+ALTER TRIGGER flights_booked_seats_I ENABLE;
+ALTER TRIGGER flights_booked_seats_D ENABLE;
+ALTER TRIGGER flights_booked_seats_U ENABLE;
+ALTER TRIGGER route_statistics_count_passengers_I ENABLE;
+ALTER TRIGGER route_statistics_count_revenue_I ENABLE;

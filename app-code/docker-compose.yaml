@@ -30,8 +30,8 @@ services:
     command: >
       bash -c "sqlplus system/$$ORACLE_PWD@oracle-db:1521/XEPDB1 @/init/00_create_user.sql
       && sqlplus $$DB_USER/$$DB_PASSWORD@oracle-db:1521/XEPDB1 @/init/01_ddl.sql
+      && sqlplus $$DB_USER/$$DB_PASSWORD@oracle-db:1521/XEPDB1 @/init/denormalization.sql
       && sqlplus $$DB_USER/$$DB_PASSWORD@oracle-db:1521/XEPDB1 @/init/02_insert.sql"
-      && sqlplus $$DB_USER/$$DB_PASSWORD@oracle-db:1521/XEPDB1 @/init/denormalization.sql"
     restart: "no"
 
   app:
