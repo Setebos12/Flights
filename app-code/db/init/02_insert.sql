@@ -364,12 +364,12 @@ INSERT INTO payments (id, payment_date, payment_status_id, currency_code, reserv
 INSERT INTO payments (id, payment_date, payment_status_id, currency_code, reservations_id) VALUES (15, DATE '2026-05-16', 2,  'EUR', 15);
 
 
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id) VALUES (1, 1, 5);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id) VALUES (1, 11, 6);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id) VALUES (2, 2, 21);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id) VALUES (3, 3, 7);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id) VALUES (4, 4, 22);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id) VALUES (9, 9, 31);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id) VALUES (11, 1, 43);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (1, 1, 5, 1001);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (1, 11, 6, 1001);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (2, 2, 21, 1002);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (3, 3, 7, 1001);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (4, 4, 22, 1002);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (9, 9, 31, 1007);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (11, 1, 43, 1009);
 
 COMMIT;

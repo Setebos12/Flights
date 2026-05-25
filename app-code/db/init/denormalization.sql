@@ -85,7 +85,7 @@ BEGIN
 
     SELECT row_nr, column_nr INTO v_seat_row, v_seat_col
     FROM seats
-    WHERE id = :new.seats_id;
+    WHERE id = :new.seats_id and serial_number = :new.serial_number;
 
     SELECT f.departure_date_time INTO v_flight_dep_time
     FROM flights f

@@ -144,7 +144,7 @@ CREATE TABLE seats (
     seat_type_id  NUMBER(1) NOT NULL,
     class_id      NUMBER(2) NOT NULL
 );
-ALTER TABLE seats ADD CONSTRAINT seats_pk          PRIMARY KEY (id);
+ALTER TABLE seats ADD CONSTRAINT seats_pk          PRIMARY KEY (id, serial_number);
 ALTER TABLE seats ADD CONSTRAINT seats_planes_fk   FOREIGN KEY (serial_number) REFERENCES planes (serial_number);
 ALTER TABLE seats ADD CONSTRAINT seats_seat_type_fk FOREIGN KEY (seat_type_id) REFERENCES seat_type (id);
 ALTER TABLE seats ADD CONSTRAINT seats_class_fk    FOREIGN KEY (class_id)      REFERENCES class (id);
@@ -269,6 +269,7 @@ CREATE TABLE boarding_pass (
     reservations_id            NUMBER(5) NOT NULL,
     passengers_id              NUMBER(5) NOT NULL,
     seats_id                   NUMBER(5) NOT NULL,
+    serial_number              NUMBER(4) NOT NULL,
     departure_airport_code     VARCHAR2(3),
     arrival_airport_code       VARCHAR2(3),
     flight_departure_date_time TIMESTAMP WITH TIME ZONE,
@@ -277,10 +278,10 @@ CREATE TABLE boarding_pass (
     seat_row                   NUMBER(2),
     seat_col                   NUMBER(1)
 );
-ALTER TABLE boarding_pass ADD CONSTRAINT boarding_pass_pk             PRIMARY KEY (seats_id, reservations_id, passengers_id);
+ALTER TABLE boarding_pass ADD CONSTRAINT boarding_pass_pk             PRIMARY KEY (seats_id, serial_number, reservations_id, passengers_id);
 ALTER TABLE boarding_pass ADD CONSTRAINT boarding_pass_reservations_fk FOREIGN KEY (reservations_id) REFERENCES reservations (id);
 ALTER TABLE boarding_pass ADD CONSTRAINT boarding_pass_passengers_fk   FOREIGN KEY (passengers_id)   REFERENCES passengers (id);
-ALTER TABLE boarding_pass ADD CONSTRAINT boarding_pass_seats_fk       FOREIGN KEY (seats_id) REFERENCES seats (id);
+ALTER TABLE boarding_pass ADD CONSTRAINT boarding_pass_seats_fk       FOREIGN KEY (seats_id, serial_number) REFERENCES seats (id, serial_number);
 ALTER TABLE boarding_pass ADD CONSTRAINT bp_dep_code_len_chk          CHECK (departure_airport_code IS NULL OR LENGTH(departure_airport_code) = 3);
 ALTER TABLE boarding_pass ADD CONSTRAINT bp_arr_code_len_chk          CHECK (arrival_airport_code IS NULL OR LENGTH(arrival_airport_code) = 3);
 ALTER TABLE boarding_pass ADD CONSTRAINT bp_different_airports_chk    CHECK (departure_airport_code != arrival_airport_code);
