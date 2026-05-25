@@ -15,7 +15,9 @@ Odpowiada za wyliczenie całkowitej ceny rezerwacji wraz z dodanymi usługami do
 - Pre-join kluczy obcych
 1. Tabela Payments - dodanie klucza obcego do tabeli Currency<br>
 Ma na celu przyspieszyć wyświetlanie kwoty transakcji wraz z odpowiednią walutą.
-2. Tabela Flights - dodanie klucza obcego do tabeli Airlines<br>
+2. Tabela Flights - dodanie klucza obcego do tabeli Currency<br>
+Ma na celu przyspieszyć wyświetlanie ceny lotu wraz z odpowiednią walutą.
+3. Tabela Flights - dodanie klucza obcego do tabeli Airlines<br>
 Pomocne, ponieważ przy locie chcemy od razu wyświetlić też informację o linii lotniczej.
 - Pre-join atrybutów
 1. Tabela Boarding Pass - duplikowane atrybuty: `departure_airport_code, arrival_airport_code, flight_departure_time, passenger_first_name, passenger_last_name, seat_row, seat_col`<br>
