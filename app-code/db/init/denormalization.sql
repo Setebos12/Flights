@@ -6,21 +6,16 @@ FOR EACH ROW
 DECLARE
     v_flight_price flights.price%TYPE;
     v_extra_sum NUMBER(9,2);
-    v_res_id reservations.id%TYPE;
 BEGIN
-    SELECT reservations_id INTO v_res_id
-    FROM reservations_payments
-    WHERE payments_id = :new.id;
-
-    SELECT f.price INTO v_flight_price
+    SELECT (f.price * r.number_in_party) INTO v_flight_price
     FROM flights f
     JOIN reservations r ON f.id = r.flights_id
-    WHERE r.id = v_res_id;
+    WHERE r.id = :new.reservations_id;
 
     SELECT NVL(SUM(es.price), 0) INTO v_extra_sum
     FROM extra_services es
     JOIN reservations_extra_services res ON es.id = res.extra_services_id
-    WHERE res.reservations_id = v_res_id;
+    WHERE res.reservations_id = :new.reservations_id;
 
     :new.payment_amount := v_flight_price + v_extra_sum;
 END;
@@ -86,11 +81,11 @@ BEGIN
     SELECT p.first_name, p.last_name INTO v_passenger_name, v_passenger_last_name
     FROM passengers p
     JOIN reservations_passengers rp ON p.id = rp.passengers_id
-    WHERE rp.reservations_id = :new.reservations_id;
+    WHERE rp.reservations_id = :new.reservations_id AND rp.passengers_id = :new.passengers_id;
 
     SELECT row_nr, column_nr INTO v_seat_row, v_seat_col
     FROM seats
-    WHERE id = :new.seats_id and serial_number = :new.serial_number;
+    WHERE id = :new.seats_id;
 
     SELECT f.departure_date_time INTO v_flight_dep_time
     FROM flights f
@@ -122,7 +117,7 @@ BEFORE INSERT ON reservations_passengers
 FOR EACH ROW
 BEGIN
     UPDATE flights
-    SET booked_seats_count = booked_seats_count + 1
+    SET booked_seats_count = NVL(booked_seats_count, 0) + 1
     WHERE id = (SELECT flights_id FROM reservations WHERE id = :new.reservations_id);
 END;
 /
@@ -132,7 +127,7 @@ BEFORE DELETE ON reservations_passengers
 FOR EACH ROW
 BEGIN
     UPDATE flights
-    SET booked_seats_count = booked_seats_count - 1
+    SET booked_seats_count = NVL(booked_seats_count, 0) - 1
     WHERE id = (SELECT flights_id FROM reservations WHERE id = :old.reservations_id);
 END;
 /
@@ -142,11 +137,11 @@ BEFORE UPDATE OF reservations_id ON reservations_passengers
 FOR EACH ROW
 BEGIN
     UPDATE flights
-    SET booked_seats_count = booked_seats_count - 1
+    SET booked_seats_count = NVL(booked_seats_count, 0) - 1
     WHERE id = (SELECT flights_id FROM reservations WHERE id = :old.reservations_id);
 
     UPDATE flights
-    SET booked_seats_count = booked_seats_count + 1
+    SET booked_seats_count = NVL(booked_seats_count, 0) + 1
     WHERE id = (SELECT flights_id FROM reservations WHERE id = :new.reservations_id);
 END;
 /
@@ -202,28 +197,25 @@ END;
 /
 
 CREATE OR REPLACE TRIGGER route_statistics_count_revenue_I
-AFTER INSERT ON reservations_payments
+AFTER INSERT ON payments
 FOR EACH ROW
 DECLARE
     v_route_id routes.id%TYPE;
     v_departure_time flights.departure_date_time%TYPE;
     v_year NUMBER(4);
     v_month NUMBER(2);
-    v_amount payments.payment_amount%TYPE;
 BEGIN
-    SELECT f.routes_id, f.departure_date_time, p.payment_amount
-    INTO v_route_id, v_departure_time, v_amount
-    FROM payments p
-    JOIN reservations_payments rp ON p.id = rp.payments_id
-    JOIN reservations r ON rp.reservations_id = r.id
+    SELECT f.routes_id, f.departure_date_time
+    INTO v_route_id, v_departure_time
+    FROM reservations r
     JOIN flights f ON r.flights_id = f.id
-    WHERE p.id = :new.payments_id AND r.id = :new.reservations_id;
+    WHERE r.id = :new.reservations_id;
 
     v_year := EXTRACT(YEAR FROM v_departure_time);
     v_month := EXTRACT(MONTH FROM v_departure_time);
 
     UPDATE route_statistics
-    SET total_revenue = NVL(total_revenue, 0) + v_amount
+    SET total_revenue = NVL(total_revenue, 0) + :new.payment_amount
     WHERE routes_id = v_route_id
     AND ((year = 0 AND month = 0)
     OR (year = v_year AND month = 0)
