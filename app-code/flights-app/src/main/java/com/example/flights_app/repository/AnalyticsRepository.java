@@ -87,16 +87,16 @@ public class AnalyticsRepository {
      * Top routes by passenger count (all-time).
      */
     public List<Map<String, Object>> findTopRoutes(int limit) {
-        return jdbc.queryForList("""
-            SELECT origin_code, origin_city, dest_code, dest_city,
-                   SUM(total_flights)     AS total_flights,
-                   SUM(total_passengers)  AS total_passengers,
-                   ROUND(AVG(avg_occupancy_pct), 2) AS avg_occupancy_pct
-            FROM v_route_seasonality
-            GROUP BY origin_code, origin_city, dest_code, dest_city
-            ORDER BY total_passengers DESC NULLS LAST
-            FETCH FIRST """ + limit + """ ROWS ONLY
-            """);
+        String sql =
+            "SELECT origin_code, origin_city, dest_code, dest_city," +
+            "       SUM(total_flights)              AS total_flights," +
+            "       SUM(total_passengers)           AS total_passengers," +
+            "       ROUND(AVG(avg_occupancy_pct),2) AS avg_occupancy_pct" +
+            " FROM v_route_seasonality" +
+            " GROUP BY origin_code, origin_city, dest_code, dest_city" +
+            " ORDER BY total_passengers DESC NULLS LAST" +
+            " FETCH FIRST " + limit + " ROWS ONLY";
+        return jdbc.queryForList(sql);
     }
 
     // ── Revenue ────────────────────────────────────────────────────────────────

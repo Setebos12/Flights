@@ -1,3 +1,4 @@
+WHENEVER SQLERROR EXIT FAILURE ROLLBACK;
 -- ============================================================
 -- Analytics Views for SkySearch Reporting Module
 -- ============================================================
@@ -144,3 +145,5 @@ JOIN routes r    ON r.id  = f.routes_id
 JOIN airports oa ON oa.id = r.origin_airport_id
 JOIN airports da ON da.id = r.destination_airport_id
 GROUP BY r.id, oa.airport_code, da.airport_code, f.currency_code;
+
+EXIT;
