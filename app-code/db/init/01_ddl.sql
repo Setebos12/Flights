@@ -212,6 +212,7 @@ CREATE TABLE luggage (
     width        NUMBER(3)
 );
 ALTER TABLE luggage ADD CONSTRAINT luggage_pk            PRIMARY KEY (id);
+ALTER TABLE luggage ADD CONSTRAINT luggage_extra_services_fk FOREIGN KEY (id) REFERENCES extra_services (id);
 ALTER TABLE luggage ADD CONSTRAINT luggage_weight_chk    CHECK (weight > 0);
 ALTER TABLE luggage ADD CONSTRAINT luggage_height_chk    CHECK (height IS NULL OR height > 0);
 ALTER TABLE luggage ADD CONSTRAINT luggage_length_chk    CHECK (length IS NULL OR length > 0);
