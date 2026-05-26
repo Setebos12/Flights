@@ -31,7 +31,6 @@ CREATE TABLE currency (
                           code VARCHAR2(3) NOT NULL
 );
 ALTER TABLE currency ADD CONSTRAINT currency_pk       PRIMARY KEY (code);
-ALTER TABLE currency ADD CONSTRAINT currency_code_uq  UNIQUE (code);
 ALTER TABLE currency ADD CONSTRAINT currency_code_len_chk   CHECK (LENGTH(code) = 3);
 ALTER TABLE currency ADD CONSTRAINT currency_code_upper_chk CHECK (code = UPPER(code));
 
