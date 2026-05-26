@@ -27,12 +27,12 @@ CREATE OR REPLACE TRIGGER prejoin_payments
 BEFORE INSERT OR UPDATE OF currency_code ON payments
 FOR EACH ROW
 BEGIN
-    SELECT code INTO :new.currency_code
-    FROM currency
-    WHERE code = :new.currency_code;
+    SELECT f.CURRENCY_CODE INTO :new.CURRENCY_CODE
+    FROM FLIGHTS f
+    JOIN RESERVATIONS r on r.FLIGHTS_ID = f.ID
+    WHERE r.ID = :new.RESERVATIONS_ID;
 END;
 /
-
 
 CREATE OR REPLACE TRIGGER prejoin_flights
 BEFORE INSERT OR UPDATE OF serial_number ON flights
@@ -41,16 +41,6 @@ BEGIN
     SELECT airlines_id INTO :new.airlines_id
     FROM planes
     WHERE serial_number = :new.serial_number;
-END;
-/
-
-CREATE OR REPLACE TRIGGER prejoin_flights_currency
-BEFORE INSERT OR UPDATE OF currency_code ON flights
-FOR EACH ROW
-BEGIN
-    SELECT code INTO :new.currency_code
-    FROM currency
-    WHERE code = :new.currency_code;
 END;
 /
 

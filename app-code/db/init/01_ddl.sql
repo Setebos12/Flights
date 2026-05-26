@@ -161,7 +161,7 @@ CREATE TABLE flights (
                          price               NUMBER(7, 2)             NOT NULL,
                          airlines_id         NUMBER(2)                NOT NULL,
                          currency_code       VARCHAR2(3)              NOT NULL,
-                         booked_seats_count  NUMBER(3),
+                         booked_seats_count  NUMBER(3)               DEFAULT 0,
                          p_seat_count        NUMBER(3)
 );
 ALTER TABLE flights ADD CONSTRAINT flights_pk          PRIMARY KEY (id);
