@@ -77,7 +77,7 @@ export default function SeasonalityChart() {
   return (
     <div className="analytics-chart-card">
       <div className="analytics-chart-header">
-        <h3 className="analytics-chart-title">🌍 Route Popularity &amp; Seasonality</h3>
+        <h3 className="analytics-chart-title">Route Popularity &amp; Seasonality</h3>
         <div className="analytics-filters">
           <select
             className="analytics-select"

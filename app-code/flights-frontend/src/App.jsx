@@ -34,24 +34,22 @@ export default function App() {
           <button
             id="nav-search"
             onClick={() => setView("search")}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              view === "search"
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${view === "search"
                 ? "bg-white/15 text-white"
                 : "text-blue-200 hover:text-white hover:bg-white/10"
-            }`}
+              }`}
           >
-            🔍 Search Flights
+            Search Flights
           </button>
           <button
             id="nav-analytics"
             onClick={() => setView("analytics")}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              view === "analytics"
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${view === "analytics"
                 ? "bg-white/15 text-white"
                 : "text-blue-200 hover:text-white hover:bg-white/10"
-            }`}
+              }`}
           >
-            📊 Analytics
+            Analytics
           </button>
         </div>
       </nav>

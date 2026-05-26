@@ -64,7 +64,7 @@ export default function OccupancyChart() {
   return (
     <div className="analytics-chart-card">
       <div className="analytics-chart-header">
-        <h3 className="analytics-chart-title">✈ Aircraft Occupancy</h3>
+        <h3 className="analytics-chart-title">Aircraft Occupancy</h3>
         <div className="analytics-toggle">
           <button
             className={mode === "flights" ? "active" : ""}

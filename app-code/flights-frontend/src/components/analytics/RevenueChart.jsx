@@ -87,7 +87,7 @@ export default function RevenueChart() {
   return (
     <div className="analytics-chart-card">
       <div className="analytics-chart-header">
-        <h3 className="analytics-chart-title">💰 Revenue from Routes</h3>
+        <h3 className="analytics-chart-title">Revenue from Routes</h3>
         <div className="analytics-filters">
           <select
             className="analytics-select"

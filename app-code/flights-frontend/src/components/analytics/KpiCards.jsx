@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { fetchKpi } from "../../analyticsApi"
 
-const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 function KpiCard({ icon, label, value, sub, color }) {
   return (
@@ -29,8 +29,8 @@ export default function KpiCards() {
   }, [])
 
   if (loading) return <div className="analytics-loading">Loading KPIs…</div>
-  if (error)   return <div className="analytics-error">⚠ {error}</div>
-  if (!kpi)    return null
+  if (error) return <div className="analytics-error">⚠ {error}</div>
+  if (!kpi) return null
 
   const revenue = kpi.totalRevenue != null
     ? `${Number(kpi.totalRevenue).toLocaleString("pl-PL", { minimumFractionDigits: 2 })} ${kpi.revenueCurrency ?? "EUR"}`

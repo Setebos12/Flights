@@ -7,11 +7,11 @@ import AirlineRankingChart from "./AirlineRankingChart"
 import PriceDistributionChart from "./PriceDistributionChart"
 
 const TABS = [
-  { id: "overview",    label: "📊 Overview",      component: <><KpiCards /><AirlineRankingChart /></> },
-  { id: "occupancy",   label: "✈ Occupancy",      component: <OccupancyChart /> },
-  { id: "seasonality", label: "🌍 Destinations",   component: <SeasonalityChart /> },
-  { id: "revenue",     label: "💰 Revenue",        component: <RevenueChart /> },
-  { id: "prices",      label: "🎫 Prices",         component: <PriceDistributionChart /> },
+  { id: "overview",    label: "Overview",      component: <><KpiCards /><AirlineRankingChart /></> },
+  { id: "occupancy",   label: "Occupancy",      component: <OccupancyChart /> },
+  { id: "seasonality", label: "Destinations",   component: <SeasonalityChart /> },
+  { id: "revenue",     label: "Revenue",        component: <RevenueChart /> },
+  { id: "prices",      label: "Prices",         component: <PriceDistributionChart /> },
 ]
 
 export default function AnalyticsDashboard() {

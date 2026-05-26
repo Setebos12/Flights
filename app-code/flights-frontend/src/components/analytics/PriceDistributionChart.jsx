@@ -48,13 +48,13 @@ export default function PriceDistributionChart() {
   }, [])
 
   if (loading) return <div className="analytics-loading">Loading price data…</div>
-  if (error)   return <div className="analytics-error">⚠ {error}</div>
+  if (error) return <div className="analytics-error">⚠ {error}</div>
   if (!data.length) return <div className="analytics-empty">No price data available.</div>
 
   return (
     <div className="analytics-chart-card">
       <div className="analytics-chart-header">
-        <h3 className="analytics-chart-title">🎫 Price Distribution by Route</h3>
+        <h3 className="analytics-chart-title">Price Distribution by Route</h3>
       </div>
 
       {/* Bar chart: min/avg/max per route */}
@@ -75,12 +75,12 @@ export default function PriceDistributionChart() {
                   <div className="analytics-price-bar" />
                   {/* Avg marker */}
                   <div className="analytics-price-marker analytics-price-avg"
-                       style={{ left: `${avgPos}%` }}
-                       title={`Avg: ${d.avgPrice}`} />
+                    style={{ left: `${avgPos}%` }}
+                    title={`Avg: ${d.avgPrice}`} />
                   {/* Median marker */}
                   <div className="analytics-price-marker analytics-price-median"
-                       style={{ left: `${medPos}%` }}
-                       title={`Median: ${d.medianPrice}`} />
+                    style={{ left: `${medPos}%` }}
+                    title={`Median: ${d.medianPrice}`} />
                 </div>
                 <span className="analytics-price-label">{d.maxPrice.toFixed(0)}</span>
               </div>
