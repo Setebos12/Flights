@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UserDetailsService implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
@@ -18,6 +18,8 @@ public class UserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmailAddress(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+
+        System.out.println("Hasło wyciągnięte z bazy: [" + user.getPassword() + "]");
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmailAddress())
