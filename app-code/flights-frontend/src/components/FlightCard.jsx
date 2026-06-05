@@ -1,4 +1,4 @@
-export default function FlightCard({ flight }) {
+export default function FlightCard({ flight, user, onRequireLogin }) {
   const formatTime = (datetime) => {
     return datetime.substring(11, 16)
   }
@@ -80,7 +80,10 @@ export default function FlightCard({ flight }) {
       <div className="text-right shrink-0">
         <div className="text-xs text-slate-400">{flight.currencyCode}</div>
         <div className="text-2xl font-medium text-slate-800 dark:text-white">{flight.price}</div>
-        <button className="mt-2 px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white text-xs rounded-lg">
+        <button
+          onClick={() => { if (!user) onRequireLogin() }}
+          className="mt-2 px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white text-xs rounded-lg"
+        >
           Book now
         </button>
       </div>

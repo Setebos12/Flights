@@ -129,7 +129,7 @@ export default function App() {
             <SearchForm onSearch={searchFlights} />
             <div className="max-w-4xl mx-auto px-4 py-6">
               {loading && <p className="text-slate-500 text-center animate-pulse">Searching...</p>}
-              <FlightList flights={flights} />
+              <FlightList flights={flights} user={user} onRequireLogin={() => setIsLoginOpen(true)} />
             </div>
           </>
         ) : (
