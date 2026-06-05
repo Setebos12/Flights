@@ -256,16 +256,16 @@ INSERT INTO luggage (id, weight, height, length, width) VALUES (6, 20.0, 75, 50,
 INSERT INTO luggage (id, weight, height, length, width) VALUES (7, 32.0, 80, 60, 35);
 
 
-INSERT INTO users (id, email_address, password, passengers_id) VALUES (1,  'jan.kowalski@email.pl',       'Haslo1234', 1);
-INSERT INTO users (id, email_address, password, passengers_id) VALUES (2,  'anna.nowak@email.pl',         'Haslo5678', 2);
-INSERT INTO users (id, email_address, password, passengers_id) VALUES (3,  'piotr.wisniewski@email.pl',   'Secure99!', 3);
-INSERT INTO users (id, email_address, password, passengers_id) VALUES (4,  'maria.kowalczyk@email.pl',    'Pass1234!', 4);
-INSERT INTO users (id, email_address, password, passengers_id) VALUES (5,  'tomasz.lewandowski@email.pl', 'TomPass77', 5);
-INSERT INTO users (id, email_address, password, passengers_id) VALUES (6,  'katarzyna.wojcik@email.pl',   'KatPass88', 6);
-INSERT INTO users (id, email_address, password, passengers_id) VALUES (7,  'marek.kaminski@email.pl',     'Marek123!', 7);
-INSERT INTO users (id, email_address, password, passengers_id) VALUES (8,  'agnieszka.zielinska@email.pl','Agn12345', 8);
-INSERT INTO users (id, email_address, password, passengers_id) VALUES (9,  'krzysztof.szymanski@email.pl','KrzPass55', 9);
-INSERT INTO users (id, email_address, password, passengers_id) VALUES (10, 'barbara.wozniak@email.pl',    'Barbara99', 10);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (1,  'jan.kowalski@email.pl',       '$2a$12$YnMp19uX9YJ3WIDp9yV9WOa4XmCstqVdf6XnFpxmI65yP7gZly6O6', 1);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (2,  'anna.nowak@email.pl',         '$2b$12$YOtoHSjhWJdzKpuWP7cETeso0v99peDGomtolJb5Ohqi6u83CjH/y', 2);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (3,  'piotr.wisniewski@email.pl',   '$2b$12$bQSVDh0gmRFGqHyxfImIOOHFs4qF1.DKpVA6Ib1x9YoPpqXZJPyfi', 3);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (4,  'maria.kowalczyk@email.pl',    '$2b$12$cbkq.v8GHQVXLmp0fLFQIelHQwfz59YZ8FFaMGIOkqXlr2tVnUIDi', 4);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (5,  'tomasz.lewandowski@email.pl', '$2b$12$vO8WTKYrC4Au1HuTO3nuZ.rF0jHklrJxv9NV95doWTF/k0dYNOhSe', 5);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (6,  'katarzyna.wojcik@email.pl',   '$2b$12$BndKta3R2bKFyp0V0/U2SeZatWAp8aT7nIYQYuyLYvC.J4GfULkbi', 6);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (7,  'marek.kaminski@email.pl',     '$2b$12$Y0i7f5qWVLZPPtXHK4EuZ.EtPcKW4cf7tAzK/jxSYk1FWtSnBwThC', 7);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (8,  'agnieszka.zielinska@email.pl','$2b$12$fh3Fql3Cl5xfAOAMb2oQieTFsSp5ctyN5JflUDcAcwJ9/XCD7XlQ2', 8);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (9,  'krzysztof.szymanski@email.pl','$2b$12$5e7sDgYDrUhSUr9/4Hc3m.e8m8M2aK5mtFHxXU.EzQG/yLrvDooY6', 9);
+INSERT INTO users (id, email_address, password, passengers_id) VALUES (10, 'barbara.wozniak@email.pl',    '$2b$12$FXgvdy/3o.LRlQ.1Spa7h.P4NGutpNqt.vZAgLBoKL8AbNgO69FD6', 10);
 
 
 INSERT INTO passengers (id, first_name, last_name, phone_number, user_id) VALUES (1,  'Jan',       'Kowalski',    '+48501234567', 1);
