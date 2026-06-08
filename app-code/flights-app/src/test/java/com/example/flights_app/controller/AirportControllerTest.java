@@ -44,4 +44,14 @@ class AirportControllerTest {
                 .andExpect(jsonPath("$[0].airportCode").value("WAW"))
                 .andExpect(jsonPath("$[0].cityName").value("Warsaw"));
     }
+
+    @Test
+    void getAirports_returnsEmptyList() throws Exception {
+        when(airportService.getAllAirports()).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/airports").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
 }

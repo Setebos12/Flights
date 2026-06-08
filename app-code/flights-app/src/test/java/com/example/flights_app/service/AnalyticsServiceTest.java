@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -133,5 +134,40 @@ class AnalyticsServiceTest {
         assertThat(result.get(0).getOriginCode()).isEqualTo("WAW");
         assertThat(result.get(0).getCurrencyCode()).isEqualTo("EUR");
         assertThat(result.get(0).getAvgPrice()).isEqualByComparingTo("280.50");
+    }
+
+    @Test
+    void getTopRoutes_returnsEmptyWhenNoData() {
+        when(analyticsRepository.findTopRoutes(10)).thenReturn(List.of());
+
+        List<Map<String, Object>> result = analyticsService.getTopRoutes(10);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getRouteRevenue_handlesNullFieldsGracefully() {
+        Map<String, Object> row = new HashMap<>();
+        row.put("ROUTE_ID", 99L);
+        row.put("ORIGIN_CODE", null);
+        row.put("ORIGIN_CITY", null);
+        row.put("DEST_CODE", null);
+        row.put("DEST_CITY", null);
+        row.put("AIRLINE_ID", null);
+        row.put("AIRLINE_NAME", null);
+        row.put("PAY_YEAR", null);
+        row.put("PAY_MONTH", null);
+        row.put("TOTAL_PAYMENTS", null);
+        row.put("TOTAL_REVENUE", null);
+        row.put("AVG_PAYMENT", null);
+        row.put("CURRENCY_CODE", null);
+
+        when(analyticsRepository.findRouteRevenue(null, null)).thenReturn(List.of(row));
+
+        List<com.example.flights_app.dto.RouteRevenueDTO> result = analyticsService.getRouteRevenue(null, null);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getOriginCode()).isNull();
+        assertThat(result.get(0).getTotalRevenue()).isNull();
     }
 }

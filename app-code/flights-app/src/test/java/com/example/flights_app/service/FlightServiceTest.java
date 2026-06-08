@@ -24,6 +24,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class FlightServiceTest {
@@ -107,5 +108,69 @@ class FlightServiceTest {
         assertThat(dto.getCurrencyCode()).isEqualTo("USD");
         assertThat(dto.getBookedSeatsCount()).isEqualTo(120);
         assertThat(dto.getSeatCount()).isEqualTo(180);
+    }
+
+    @Test
+    void searchFlights_mapsZeroPriceCorrectly() {
+        Flight flight = new Flight();
+        flight.setId(21L);
+        flight.setPrice(BigDecimal.ZERO);
+
+        Route route = new Route();
+        Airport a1 = new Airport(); a1.setAirportCode("AAA"); a1.setAirportName("A1"); City c1 = new City(); c1.setName("C1"); a1.setCity(c1);
+        Airport a2 = new Airport(); a2.setAirportCode("BBB"); a2.setAirportName("B1"); City c2 = new City(); c2.setName("C2"); a2.setCity(c2);
+        route.setOriginAirport(a1); route.setDestinationAirport(a2);
+        flight.setRoute(route);
+
+        Plane plane = new Plane();
+        plane.setSerialNumber(555L);
+        plane.setModel("TestPlane");
+        flight.setPlane(plane);
+        Airline airline = new Airline();
+        airline.setId(99L);
+        airline.setName("ZeroAir");
+        flight.setAirline(airline);
+        Currency currency = new Currency();
+        currency.setCode("USD");
+        flight.setCurrency(currency);
+
+        when(flightRepository.findFlights(null, null, null, null, null)).thenReturn(List.of(flight));
+
+        List<FlightResponseDTO> result = flightService.searchFlights(null, null, null, null, null);
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getPrice()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void searchFlights_preservesBookedSeatsEvenIfExceedsCapacity() {
+        Flight flight = new Flight();
+        flight.setId(22L);
+        flight.setBookedSeatsCount(250);
+        flight.setSeatCount(200);
+
+        Route route = new Route();
+        Airport a1 = new Airport(); a1.setAirportCode("CCC"); a1.setAirportName("C1"); City c1 = new City(); c1.setName("C1"); a1.setCity(c1);
+        Airport a2 = new Airport(); a2.setAirportCode("DDD"); a2.setAirportName("D1"); City c2 = new City(); c2.setName("C2"); a2.setCity(c2);
+        route.setOriginAirport(a1); route.setDestinationAirport(a2);
+        flight.setRoute(route);
+
+        Plane plane = new Plane();
+        plane.setSerialNumber(556L);
+        plane.setModel("OversellPlane");
+        flight.setPlane(plane);
+        Airline airline = new Airline();
+        airline.setId(100L);
+        airline.setName("OversellAir");
+        flight.setAirline(airline);
+        Currency currency = new Currency();
+        currency.setCode("USD");
+        flight.setCurrency(currency);
+
+        when(flightRepository.findFlights(null, null, null, null, null)).thenReturn(List.of(flight));
+
+        List<FlightResponseDTO> result = flightService.searchFlights(null, null, null, null, null);
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getBookedSeatsCount()).isEqualTo(250);
+        assertThat(result.get(0).getSeatCount()).isEqualTo(200);
     }
 }

@@ -105,4 +105,23 @@ class AnalyticsControllerTest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].origin_code").value("WAW"));
     }
+
+        @Test
+        void getRouteRevenue_returnsEmptyWhenNoData() throws Exception {
+                when(analyticsService.getRouteRevenue(2026, null)).thenReturn(List.of());
+
+                mockMvc.perform(get("/api/analytics/routes/revenue")
+                                                .param("year", "2026")
+                                                .accept(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.length()").value(0));
+        }
+
+        @Test
+        void getOccupancy_invalidAirlineId_returnsBadRequest() throws Exception {
+                mockMvc.perform(get("/api/analytics/occupancy")
+                                                .param("airlineId", "not-a-number")
+                                                .accept(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isBadRequest());
+        }
 }
