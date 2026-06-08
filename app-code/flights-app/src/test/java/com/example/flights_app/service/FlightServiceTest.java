@@ -173,4 +173,20 @@ class FlightServiceTest {
         assertThat(result.get(0).getBookedSeatsCount()).isEqualTo(250);
         assertThat(result.get(0).getSeatCount()).isEqualTo(200);
     }
+
+    @Test
+    void searchFlights_repositoryReturnsNull_throwsNpe() {
+        when(flightRepository.findFlights(null, null, null, null, null)).thenReturn(null);
+
+        assertThrows(NullPointerException.class, () -> flightService.searchFlights(null, null, null, null, null));
+    }
+
+    @Test
+    void searchFlights_minGreaterThanMax_forwardsToRepository() {
+        // service does not validate price ordering; ensure it forwards values and returns empty when repo does
+        when(flightRepository.findFlights(null, null, null, BigDecimal.valueOf(500), BigDecimal.valueOf(100))).thenReturn(List.of());
+
+        List<FlightResponseDTO> result = flightService.searchFlights(null, null, null, BigDecimal.valueOf(500), BigDecimal.valueOf(100));
+        assertThat(result).isEmpty();
+    }
 }

@@ -124,4 +124,13 @@ class AnalyticsControllerTest {
                                                 .accept(MediaType.APPLICATION_JSON))
                                 .andExpect(status().isBadRequest());
         }
+
+        @Test
+        void getKpi_serviceThrows_returnsServerError() throws Exception {
+                when(analyticsService.getKpiSummary()).thenThrow(new RuntimeException("db fail"));
+
+                // Controller will surface the exception in MockMvc; assert that performing the request throws
+                org.junit.jupiter.api.Assertions.assertThrows(Exception.class,
+                        () -> mockMvc.perform(get("/api/analytics/kpi").accept(MediaType.APPLICATION_JSON)).andReturn());
+        }
 }

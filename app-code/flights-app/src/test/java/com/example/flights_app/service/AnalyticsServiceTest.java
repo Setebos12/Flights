@@ -19,6 +19,7 @@ import java.util.HashMap;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class AnalyticsServiceTest {
@@ -169,5 +170,32 @@ class AnalyticsServiceTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getOriginCode()).isNull();
         assertThat(result.get(0).getTotalRevenue()).isNull();
+    }
+
+    @Test
+    void getKpiSummary_handlesNullTopRoute() {
+        Map<String, Object> row = new HashMap<>();
+        row.put("TOTAL_FLIGHTS", 10L);
+        row.put("TOTAL_PASSENGERS", 100L);
+        row.put("TOTAL_REVENUE", BigDecimal.valueOf(1000));
+        row.put("AVG_OCCUPANCY_PCT", BigDecimal.valueOf(75));
+        row.put("TOP_ROUTE", null);
+        row.put("TOP_AIRLINE", "NullAir");
+        row.put("REVENUE_CURRENCY", "USD");
+
+        when(analyticsRepository.findKpiSummary()).thenReturn(row);
+
+        KpiSummaryDTO dto = analyticsService.getKpiSummary();
+
+        assertThat(dto.getTopRouteOrigin()).isEqualTo("—");
+        assertThat(dto.getTopRouteDest()).isEqualTo("—");
+        assertThat(dto.getTopAirline()).isEqualTo("NullAir");
+    }
+
+    @Test
+    void getOccupancy_repositoryThrows_propagates() {
+        when(analyticsRepository.findOccupancy(null, null, null, null)).thenThrow(new RuntimeException("db"));
+
+        assertThrows(RuntimeException.class, () -> analyticsService.getOccupancy(null, null, null, null));
     }
 }

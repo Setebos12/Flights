@@ -104,4 +104,12 @@ class FlightControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
+
+        @Test
+        void searchFlights_invalidPriceParam_returnsBadRequest() throws Exception {
+                mockMvc.perform(get("/api/flights/search")
+                                                .param("minPrice", "not-a-number")
+                                                .accept(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isBadRequest());
+        }
 }
