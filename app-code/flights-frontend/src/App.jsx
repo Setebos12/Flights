@@ -11,6 +11,7 @@ export default function App() {
   const [view, setView] = useState("search") // "search" | "analytics"
   // auth
   const [user, setUser] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
 
@@ -18,10 +19,19 @@ export default function App() {
   useEffect(() => {
       const token = localStorage.getItem("token")
       const email = localStorage.getItem("email")
+      const storedAdmin = localStorage.getItem("isAdmin") === "true"
+      const emailAdmin = email?.toLowerCase().includes("admin")
       if (token && email) {
         setUser({ token, email })
+        setIsAdmin(storedAdmin || emailAdmin)
       }
     }, [])
+
+  useEffect(() => {
+      if (view === "analytics" && !isAdmin) {
+        setView("search")
+      }
+    }, [view, isAdmin])
 
   const searchFlights = async (params) => {
     setLoading(true)
@@ -53,7 +63,15 @@ export default function App() {
     }
 
         const handleLoginSuccess = (userData) => {
+            const admin = Boolean(
+              userData?.isAdmin ||
+              userData?.roles?.includes("ADMIN") ||
+              userData?.roles?.includes("ROLE_ADMIN") ||
+              userData?.email?.toLowerCase().includes("admin")
+            )
             setUser(userData)
+            setIsAdmin(admin)
+            localStorage.setItem("isAdmin", admin ? "true" : "false")
             setIsLoginOpen(false)
           }
 
@@ -61,7 +79,9 @@ export default function App() {
             localStorage.removeItem("token")
             localStorage.removeItem("userId")
             localStorage.removeItem("email")
+            localStorage.removeItem("isAdmin")
             setUser(null)
+            setIsAdmin(false)
             setView("search") // reset view
           }
 
@@ -86,17 +106,19 @@ export default function App() {
               >
                 Search Flights
               </button>
-              <button
-                id="nav-analytics"
-                onClick={() => setView("analytics")}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  view === "analytics"
-                    ? "bg-white/15 text-white"
-                    : "text-blue-200 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                Analytics
-              </button>
+              {isAdmin && (
+                <button
+                  id="nav-analytics"
+                  onClick={() => setView("analytics")}
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    view === "analytics"
+                      ? "bg-white/15 text-white"
+                      : "text-blue-200 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  Analytics
+                </button>
+              )}
             </div>
           </div>
 
