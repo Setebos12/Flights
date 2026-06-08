@@ -36,8 +36,18 @@ public class FlightService {
                 f.getAirline().getName(),
                 f.getCurrency().getCode(),
                 f.getBookedSeatsCount(),
-                f.getSeatCount()
+                f.getSeatCount(),
+                calculateAvailableSeats(f)
         );
+    }
+
+    private Integer calculateAvailableSeats(Flight f) {
+        if (f.getSeatCount() == null) {
+            return null;
+        }
+        int booked = f.getBookedSeatsCount() != null ? f.getBookedSeatsCount() : 0;
+        int available = f.getSeatCount() - booked;
+        return available >= 0 ? available : 0;
     }
 
     public List<FlightResponseDTO> searchFlights(

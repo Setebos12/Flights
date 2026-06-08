@@ -1,19 +1,48 @@
 import { useState, useEffect } from "react"
 import SearchForm from "./components/SearchForm"
 import FlightList from "./components/FlightList"
+import BookingModal from "./components/BookingModal"
 import AnalyticsDashboard from "./components/analytics/AnalyticsDashboard"
 import LoginForm from "./components/LoginForm"
 import RegisterForm from "./components/RegisterForm"
+import MyTickets from "./components/MyTickets"
 
 export default function App() {
   const [flights, setFlights] = useState([])
   const [loading, setLoading] = useState(false)
-  const [view, setView] = useState("search") // "search" | "analytics"
+  const [view, setView] = useState("search") // "search" | "analytics" | "tickets"
+  const [bookingFlight, setBookingFlight] = useState(null)
+  const [pendingBookingFlight, setPendingBookingFlight] = useState(null)
+  const [myTickets, setMyTickets] = useState([])
   // auth
   const [user, setUser] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
+
+  const loadTicketsForUser = (userId) => {
+    if (!userId) return []
+    const stored = localStorage.getItem(`skysearch_tickets_${userId}`)
+    try {
+      return stored ? JSON.parse(stored) : []
+    } catch (e) {
+      console.error("Failed to parse stored tickets", e)
+      return []
+    }
+  }
+
+  const saveTicketsForUser = (userId, tickets) => {
+    if (!userId) return
+    localStorage.setItem(`skysearch_tickets_${userId}`, JSON.stringify(tickets))
+  }
+
+  useEffect(() => {
+    if (user?.userId) {
+      setMyTickets(loadTicketsForUser(user.userId))
+    } else {
+      setMyTickets([])
+    }
+  }, [user])
 
   // login check
   useEffect(() => {
@@ -21,8 +50,9 @@ export default function App() {
       const email = localStorage.getItem("email")
       const storedAdmin = localStorage.getItem("isAdmin") === "true"
       const emailAdmin = email?.toLowerCase().includes("admin")
+      const userId = localStorage.getItem("userId")
       if (token && email) {
-        setUser({ token, email })
+        setUser({ token, email, userId })
         setIsAdmin(storedAdmin || emailAdmin)
       }
     }, [])
@@ -72,7 +102,13 @@ export default function App() {
             setUser(userData)
             setIsAdmin(admin)
             localStorage.setItem("isAdmin", admin ? "true" : "false")
+            localStorage.setItem("userId", userData.userId)
+            setMyTickets(loadTicketsForUser(userData.userId))
             setIsLoginOpen(false)
+            if (pendingBookingFlight) {
+              setBookingFlight(pendingBookingFlight)
+              setPendingBookingFlight(null)
+            }
           }
 
           const handleLogout = () => {
@@ -82,8 +118,44 @@ export default function App() {
             localStorage.removeItem("isAdmin")
             setUser(null)
             setIsAdmin(false)
+            setMyTickets([])
             setView("search") // reset view
           }
+
+  const openBooking = (flight) => {
+    if (!user) {
+      setPendingBookingFlight(flight)
+      setIsLoginOpen(true)
+      return
+    }
+    setBookingFlight(flight)
+  }
+
+  const closeBooking = () => {
+    setBookingFlight(null)
+  }
+
+  const handleBookingComplete = ({ ticketCount, tickets = [] }) => {
+    if (!bookingFlight) return
+    setFlights((current) => current.map((flight) => {
+      if (flight.id !== bookingFlight.id) return flight
+      const updatedBooked = (flight.bookedSeatsCount || 0) + Number(ticketCount)
+      const availableSeats = flight.availableSeats != null
+        ? Math.max(0, flight.availableSeats - Number(ticketCount))
+        : Math.max(0, (flight.seatCount || 0) - updatedBooked)
+      return {
+        ...flight,
+        bookedSeatsCount: updatedBooked,
+        availableSeats,
+      }
+    }))
+    const updatedTickets = [...myTickets, ...tickets]
+    if (user?.userId) {
+      saveTicketsForUser(user.userId, updatedTickets)
+    }
+    setMyTickets(updatedTickets)
+    setBookingFlight(null)
+  }
 
   return (
       <div className="min-h-screen bg-slate-100 dark:bg-slate-900">
@@ -106,6 +178,19 @@ export default function App() {
               >
                 Search Flights
               </button>
+              {user && (
+                <button
+                  id="nav-tickets"
+                  onClick={() => setView("tickets")}
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    view === "tickets"
+                      ? "bg-white/15 text-white"
+                      : "text-blue-200 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  My Tickets
+                </button>
+              )}
               {isAdmin && (
                 <button
                   id="nav-analytics"
@@ -151,9 +236,17 @@ export default function App() {
             <SearchForm onSearch={searchFlights} />
             <div className="max-w-4xl mx-auto px-4 py-6">
               {loading && <p className="text-slate-500 text-center animate-pulse">Searching...</p>}
-              <FlightList flights={flights} user={user} onRequireLogin={() => setIsLoginOpen(true)} />
+              <FlightList
+                flights={flights}
+                user={user}
+                onBook={openBooking}
+              />
             </div>
           </>
+        ) : view === "tickets" ? (
+          <div className="max-w-6xl mx-auto px-4 py-6">
+            <MyTickets tickets={myTickets} user={user} />
+          </div>
         ) : (
           <AnalyticsDashboard />
         )}
@@ -169,6 +262,13 @@ export default function App() {
             onLogin={handleLoginSuccess}
             onClose={() => setIsRegisterOpen(false)}
             onSwitchToLogin={() => { setIsRegisterOpen(false); setIsLoginOpen(true) }}
+          />
+        )}
+        {bookingFlight && (
+          <BookingModal
+            flight={bookingFlight}
+            onClose={closeBooking}
+            onComplete={handleBookingComplete}
           />
         )}
       </div>

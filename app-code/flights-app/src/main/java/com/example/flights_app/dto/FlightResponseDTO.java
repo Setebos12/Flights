@@ -37,4 +37,5 @@ public class FlightResponseDTO {
 
     private Integer bookedSeatsCount;
     private Integer seatCount;
+    private Integer availableSeats;
 }

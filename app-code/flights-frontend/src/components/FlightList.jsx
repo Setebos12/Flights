@@ -1,6 +1,6 @@
 import FlightCard from "./FlightCard"
 
-export default function FlightList({ flights, user, onRequireLogin }) {
+export default function FlightList({ flights, user, onBook }) {
   if (flights.length === 0) {
     return (
       <p className="text-slate-400 text-center mt-10">
@@ -16,7 +16,7 @@ export default function FlightList({ flights, user, onRequireLogin }) {
       </p>
       <div className="flex flex-col gap-3">
         {flights.map(flight => (
-          <FlightCard key={flight.id} flight={flight} user={user} onRequireLogin={onRequireLogin} />
+          <FlightCard key={flight.id} flight={flight} user={user} onBook={onBook} />
         ))}
       </div>
     </div>

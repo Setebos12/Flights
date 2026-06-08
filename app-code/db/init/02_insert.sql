@@ -87,16 +87,35 @@ INSERT INTO airlines (id, name) VALUES (9,  'Iberia');
 INSERT INTO airlines (id, name) VALUES (10, 'Alitalia');
 
 
-INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1001, 'Boeing 737-800',    189, 9900,  26020, 6);
-INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1002, 'Airbus A320',       180, 9500,  26730, 7);
-INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1003, 'Boeing 787-9',      296, 9900,  56217, 1);
-INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1004, 'Airbus A321neo',    220, 9900,  32940, 2);
-INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1005, 'Boeing 767-300ER',  218, 9900,  63216, 3);
-INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1006, 'Airbus A380-800',   555, 9999,  86671, 4);
-INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1007, 'Embraer E195',      120, 7000,  13984, 5);
-INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1008, 'Boeing 737 MAX 8',  178, 9900,  25816, 6);
-INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1009, 'Airbus A319',       156, 8500,  26730, 8);
-INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1010, 'Boeing 777-300ER',  396, 9999,  99679, 4);
+INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id)
+VALUES (1001, 'Boeing 737-800', 16, 9900, 26020, 6);
+
+INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id)
+VALUES (1002, 'Airbus A320', 10, 9500, 26730, 7);
+
+INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id)
+VALUES (1003, 'Boeing 787-9', 0, 9900, 56217, 1);
+
+INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id)
+VALUES (1004, 'Airbus A321neo', 0, 9900, 32940, 2);
+
+INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id)
+VALUES (1005, 'Boeing 767-300ER', 0, 9900, 63216, 3);
+
+INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id)
+VALUES (1006, 'Airbus A380-800', 0, 9999, 86671, 4);
+
+INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id)
+VALUES (1007, 'Embraer E195', 10, 7000, 13984, 5);
+
+INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id)
+VALUES (1008, 'Boeing 737 MAX 8', 0, 9900, 25816, 6);
+
+INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id)
+VALUES (1009, 'Airbus A319', 10, 8500, 26730, 8);
+
+INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id)
+VALUES (1010, 'Boeing 777-300ER', 0, 9999, 99679, 4);
 
 
 INSERT INTO class (id, type) VALUES (1, 'Economy');
@@ -371,5 +390,6 @@ INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_numb
 INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (4, 4, 22, 1002);
 INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (9, 9, 31, 1007);
 INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (11, 1, 43, 1009);
+
 
 COMMIT;
