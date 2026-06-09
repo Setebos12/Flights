@@ -20,4 +20,7 @@ public class User {
 
     @Column(name = "PASSENGERS_ID")
     private Long passengersId;
+
+    @Column(name = "IS_ADMIN")
+    private Integer isAdmin;
 }

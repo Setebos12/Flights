@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/flights/**").permitAll()
                         .requestMatchers("/api/airports/**").permitAll()
+                        .requestMatchers("/api/analytics/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

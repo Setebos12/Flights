@@ -9,7 +9,7 @@ ALTER TRIGGER flights_booked_seats_D ENABLE;
 ALTER TRIGGER flights_booked_seats_U ENABLE;
 ALTER TRIGGER route_statistics_count_passengers_I ENABLE;
 ALTER TRIGGER route_statistics_count_revenue_I ENABLE;
-ALTER TRIGGER planes_generate_seats ENABLE;
+ALTER TRIGGER planes_create_seats ENABLE;
 
 INSERT INTO time_zone (id, code, utc_difference) VALUES (1,  'UTC',   0);
 INSERT INTO time_zone (id, code, utc_difference) VALUES (2,  'CET',   1);
@@ -231,6 +231,7 @@ INSERT INTO users (id, email_address, password, passengers_id) VALUES (7,  'mare
 INSERT INTO users (id, email_address, password, passengers_id) VALUES (8,  'agnieszka.zielinska@email.pl','$2b$12$fh3Fql3Cl5xfAOAMb2oQieTFsSp5ctyN5JflUDcAcwJ9/XCD7XlQ2', 8);
 INSERT INTO users (id, email_address, password, passengers_id) VALUES (9,  'krzysztof.szymanski@email.pl','$2b$12$5e7sDgYDrUhSUr9/4Hc3m.e8m8M2aK5mtFHxXU.EzQG/yLrvDooY6', 9);
 INSERT INTO users (id, email_address, password, passengers_id) VALUES (10, 'barbara.wozniak@email.pl',    '$2b$12$FXgvdy/3o.LRlQ.1Spa7h.P4NGutpNqt.vZAgLBoKL8AbNgO69FD6', 10);
+UPDATE users SET is_admin = 1 WHERE id = 2;
 
 
 INSERT INTO passengers (id, first_name, last_name, phone_number, user_id) VALUES (1,  'Jan',       'Kowalski',    '+48501234567', 1);

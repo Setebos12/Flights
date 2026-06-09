@@ -177,7 +177,8 @@ CREATE TABLE users (
                        id            NUMBER(4)    NOT NULL,
                        email_address VARCHAR2(128) NOT NULL,
                        password      VARCHAR2(128) NOT NULL,
-                       passengers_id NUMBER(5)
+                       passengers_id NUMBER(5),
+                       is_admin      NUMBER(1)    DEFAULT 0 NOT NULL
 );
 
 ALTER TABLE users ADD CONSTRAINT users_pk              PRIMARY KEY (id);

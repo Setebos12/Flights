@@ -49,11 +49,10 @@ export default function App() {
       const token = localStorage.getItem("token")
       const email = localStorage.getItem("email")
       const storedAdmin = localStorage.getItem("isAdmin") === "true"
-      const emailAdmin = email?.toLowerCase().includes("admin")
       const userId = localStorage.getItem("userId")
       if (token && email) {
         setUser({ token, email, userId })
-        setIsAdmin(storedAdmin || emailAdmin)
+        setIsAdmin(storedAdmin)
       }
     }, [])
 
@@ -93,12 +92,7 @@ export default function App() {
     }
 
         const handleLoginSuccess = (userData) => {
-            const admin = Boolean(
-              userData?.isAdmin ||
-              userData?.roles?.includes("ADMIN") ||
-              userData?.roles?.includes("ROLE_ADMIN") ||
-              userData?.email?.toLowerCase().includes("admin")
-            )
+            const admin = Boolean(userData?.isAdmin)
             setUser(userData)
             setIsAdmin(admin)
             localStorage.setItem("isAdmin", admin ? "true" : "false")
@@ -216,9 +210,14 @@ export default function App() {
           <div className="flex items-center gap-4">
             {user ? (
               <>
-                <span className="text-blue-200 text-sm hidden sm:inline font-medium">
-                  {user.email}
-                </span>
+                <div className="hidden sm:flex items-center gap-2">
+                  <span className="text-blue-200 text-sm font-medium">{user.email}</span>
+                  {isAdmin && (
+                    <span className="rounded-full bg-amber-400 px-2 py-0.5 text-xs font-bold text-amber-900">
+                      ADMIN
+                    </span>
+                  )}
+                </div>
                 <button
                   onClick={handleLogout}
                   className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors shadow-sm"

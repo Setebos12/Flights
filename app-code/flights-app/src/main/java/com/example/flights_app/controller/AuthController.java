@@ -38,8 +38,9 @@ public class AuthController {
                     .orElseThrow(() -> new RuntimeException("User not found after authentication"));
 
             String token = jwtService.generateToken(request.getEmail());
+            boolean isAdmin = Integer.valueOf(1).equals(user.getIsAdmin());
 
-            return ResponseEntity.ok(new AuthResponse(token, user.getEmailAddress(), user.getId()));
+            return ResponseEntity.ok(new AuthResponse(token, user.getEmailAddress(), user.getId(), isAdmin));
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Invalid email or password");
         }
@@ -73,6 +74,6 @@ public class AuthController {
         userRepository.save(user);
 
         String token = jwtService.generateToken(request.getEmail());
-        return ResponseEntity.ok(new AuthResponse(token, user.getEmailAddress(), userId));
+        return ResponseEntity.ok(new AuthResponse(token, user.getEmailAddress(), userId, false));
     }
 }
