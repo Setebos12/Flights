@@ -9,6 +9,7 @@ ALTER TRIGGER flights_booked_seats_D ENABLE;
 ALTER TRIGGER flights_booked_seats_U ENABLE;
 ALTER TRIGGER route_statistics_count_passengers_I ENABLE;
 ALTER TRIGGER route_statistics_count_revenue_I ENABLE;
+ALTER TRIGGER planes_generate_seats ENABLE;
 
 INSERT INTO time_zone (id, code, utc_difference) VALUES (1,  'UTC',   0);
 INSERT INTO time_zone (id, code, utc_difference) VALUES (2,  'CET',   1);
@@ -329,13 +330,13 @@ INSERT INTO payments (id, payment_date, payment_status_id, currency_code, reserv
 INSERT INTO payments (id, payment_date, payment_status_id, currency_code, reservations_id) VALUES (15, DATE '2026-05-16', 2,  'EUR', 15);
 
 
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (1, 1, 5, 1001);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (1, 11, 6, 1001);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (2, 2, 21, 1002);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (3, 3, 7, 1001);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (4, 4, 22, 1002);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (9, 9, 31, 1007);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (11, 1, 43, 1009);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (1,  1,    7, 1001);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (1,  11,   8, 1001);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (2,  2,  196, 1002);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (3,  3,    9, 1001);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (4,  4,  197, 1002);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (9,  9, 1665, 1007);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (11, 1, 1965, 1009);
 
 
 COMMIT;

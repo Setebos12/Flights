@@ -237,7 +237,9 @@ export default function App() {
           </div>
 
         </nav>
-        {view === "search" ? (
+        {view === "bookings" ? (
+          <MyBookings />
+        ) : view === "search" ? (
           <>
             <SearchForm onSearch={searchFlights} />
             <div className="max-w-4xl mx-auto px-4 py-6">
@@ -255,7 +257,7 @@ export default function App() {
           </div>
         ) : (
           <AnalyticsDashboard />
-        )}
+        ) }
         {isLoginOpen && (
           <LoginForm
             onLogin={handleLoginSuccess}

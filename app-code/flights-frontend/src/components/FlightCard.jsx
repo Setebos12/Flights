@@ -29,6 +29,7 @@ export default function FlightCard({ flight, user, onBook }) {
   }
 
   return (
+    <>
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex items-center gap-4">
 
       <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-slate-700 flex items-center justify-center text-sm font-bold text-blue-700 dark:text-blue-300">
@@ -91,5 +92,14 @@ export default function FlightCard({ flight, user, onBook }) {
       </div>
 
     </div>
+
+    {isBookingOpen && (
+      <BookingModal
+        flight={flight}
+        onClose={() => setIsBookingOpen(false)}
+        onSuccess={() => setIsBookingOpen(false)}
+      />
+    )}
+    </>
   )
 }
