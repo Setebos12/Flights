@@ -45,7 +45,8 @@ class FlightControllerTest {
                 "FlyFast",
                 "USD",
                 120,
-                180
+                180,
+                null
         );
 
         when(flightService.searchFlights("WAW", "JFK", null, null, null))
@@ -79,7 +80,8 @@ class FlightControllerTest {
                 "FlyFast",
                 "USD",
                 50,
-                150
+                150,
+                null
         );
 
         when(flightService.searchFlights("WAW", "JFK", LocalDate.of(2026,6,15), BigDecimal.valueOf(100), BigDecimal.valueOf(300)))
