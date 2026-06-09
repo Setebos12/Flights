@@ -4,11 +4,12 @@ import FlightList from "./components/FlightList"
 import AnalyticsDashboard from "./components/analytics/AnalyticsDashboard"
 import LoginForm from "./components/LoginForm"
 import RegisterForm from "./components/RegisterForm"
+import MyBookings from "./components/MyBookings"
 
 export default function App() {
   const [flights, setFlights] = useState([])
   const [loading, setLoading] = useState(false)
-  const [view, setView] = useState("search") // "search" | "analytics"
+  const [view, setView] = useState("search") // "search" | "analytics" | "bookings"
   // auth
   const [user, setUser] = useState(null)
   const [isLoginOpen, setIsLoginOpen] = useState(false)
@@ -97,6 +98,18 @@ export default function App() {
               >
                 Analytics
               </button>
+              {user && (
+                <button
+                  onClick={() => setView("bookings")}
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    view === "bookings"
+                      ? "bg-white/15 text-white"
+                      : "text-blue-200 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  My bookings
+                </button>
+              )}
             </div>
           </div>
 
@@ -124,7 +137,9 @@ export default function App() {
           </div>
 
         </nav>
-        {view === "search" ? (
+        {view === "bookings" ? (
+          <MyBookings />
+        ) : view === "search" ? (
           <>
             <SearchForm onSearch={searchFlights} />
             <div className="max-w-4xl mx-auto px-4 py-6">
@@ -134,7 +149,7 @@ export default function App() {
           </>
         ) : (
           <AnalyticsDashboard />
-        )}
+        ) }
         {isLoginOpen && (
           <LoginForm
             onLogin={handleLoginSuccess}

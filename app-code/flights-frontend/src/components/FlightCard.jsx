@@ -1,4 +1,8 @@
+import { useState } from "react"
+import BookingModal from "./BookingModal"
+
 export default function FlightCard({ flight, user, onRequireLogin }) {
+  const [isBookingOpen, setIsBookingOpen] = useState(false)
   const formatTime = (datetime) => {
     return datetime.substring(11, 16)
   }
@@ -29,6 +33,7 @@ export default function FlightCard({ flight, user, onRequireLogin }) {
   }
 
   return (
+    <>
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex items-center gap-4">
 
       <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-slate-700 flex items-center justify-center text-sm font-bold text-blue-700 dark:text-blue-300">
@@ -81,7 +86,7 @@ export default function FlightCard({ flight, user, onRequireLogin }) {
         <div className="text-xs text-slate-400">{flight.currencyCode}</div>
         <div className="text-2xl font-medium text-slate-800 dark:text-white">{flight.price}</div>
         <button
-          onClick={() => { if (!user) onRequireLogin() }}
+          onClick={() => { if (!user) onRequireLogin(); else setIsBookingOpen(true) }}
           className="mt-2 px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white text-xs rounded-lg"
         >
           Book now
@@ -89,5 +94,14 @@ export default function FlightCard({ flight, user, onRequireLogin }) {
       </div>
 
     </div>
+
+    {isBookingOpen && (
+      <BookingModal
+        flight={flight}
+        onClose={() => setIsBookingOpen(false)}
+        onSuccess={() => setIsBookingOpen(false)}
+      />
+    )}
+    </>
   )
 }
