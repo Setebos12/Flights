@@ -9,6 +9,7 @@ ALTER TRIGGER flights_booked_seats_D ENABLE;
 ALTER TRIGGER flights_booked_seats_U ENABLE;
 ALTER TRIGGER route_statistics_count_passengers_I ENABLE;
 ALTER TRIGGER route_statistics_count_revenue_I ENABLE;
+ALTER TRIGGER planes_generate_seats ENABLE;
 
 INSERT INTO time_zone (id, code, utc_difference) VALUES (1,  'UTC',   0);
 INSERT INTO time_zone (id, code, utc_difference) VALUES (2,  'CET',   1);
@@ -87,6 +88,17 @@ INSERT INTO airlines (id, name) VALUES (9,  'Iberia');
 INSERT INTO airlines (id, name) VALUES (10, 'Alitalia');
 
 
+INSERT INTO class (id, type) VALUES (1, 'Economy');
+INSERT INTO class (id, type) VALUES (2, 'Premium Economy');
+INSERT INTO class (id, type) VALUES (3, 'Business');
+INSERT INTO class (id, type) VALUES (4, 'First Class');
+
+
+INSERT INTO seat_type (id, type) VALUES (1, 'Window');
+INSERT INTO seat_type (id, type) VALUES (2, 'Middle');
+INSERT INTO seat_type (id, type) VALUES (3, 'Aisle');
+
+
 INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1001, 'Boeing 737-800',    189, 9900,  26020, 6);
 INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1002, 'Airbus A320',       180, 9500,  26730, 7);
 INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1003, 'Boeing 787-9',      296, 9900,  56217, 1);
@@ -99,71 +111,7 @@ INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capaci
 INSERT INTO planes (serial_number, model, seat_count, load_capacity, fuel_capacity, airlines_id) VALUES (1010, 'Boeing 777-300ER',  396, 9999,  99679, 4);
 
 
-INSERT INTO class (id, type) VALUES (1, 'Economy');
-INSERT INTO class (id, type) VALUES (2, 'Premium Economy');
-INSERT INTO class (id, type) VALUES (3, 'Business');
-INSERT INTO class (id, type) VALUES (4, 'First Class');
-
-
-INSERT INTO seat_type (id, type) VALUES (1, 'Window');
-INSERT INTO seat_type (id, type) VALUES (2, 'Middle');
-INSERT INTO seat_type (id, type) VALUES (3, 'Aisle');
-
-
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (1,  1, 1, 1001, 1, 3);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (2,  1, 2, 1001, 3, 3);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (3,  1, 3, 1001, 3, 3);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (4,  1, 4, 1001, 1, 3);
-
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (5,  2, 1, 1001, 1, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (6,  2, 2, 1001, 2, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (7,  2, 3, 1001, 3, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (8,  2, 4, 1001, 3, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (9,  2, 5, 1001, 2, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (10, 2, 6, 1001, 1, 1);
-
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (11, 3, 1, 1001, 1, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (12, 3, 2, 1001, 2, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (13, 3, 3, 1001, 3, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (14, 3, 4, 1001, 3, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (15, 3, 5, 1001, 2, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (16, 3, 6, 1001, 1, 1);
-
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (17, 1, 1, 1002, 1, 3);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (18, 1, 2, 1002, 3, 3);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (19, 1, 3, 1002, 3, 3);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (20, 1, 4, 1002, 1, 3);
-
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (21, 2, 1, 1002, 1, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (22, 2, 2, 1002, 2, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (23, 2, 3, 1002, 3, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (24, 2, 4, 1002, 3, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (25, 2, 5, 1002, 2, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (26, 2, 6, 1002, 1, 1);
-
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (27, 1, 1, 1007, 1, 3);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (28, 1, 2, 1007, 3, 3);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (29, 1, 3, 1007, 3, 3);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (30, 1, 4, 1007, 1, 3);
-
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (31, 2, 1, 1007, 1, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (32, 2, 2, 1007, 2, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (33, 2, 3, 1007, 3, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (34, 2, 4, 1007, 3, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (35, 2, 5, 1007, 2, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (36, 2, 6, 1007, 1, 1);
-
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (37, 1, 1, 1009, 1, 3);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (38, 1, 2, 1009, 3, 3);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (39, 1, 3, 1009, 3, 3);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (40, 1, 4, 1009, 1, 3);
-
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (41, 2, 1, 1009, 1, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (42, 2, 2, 1009, 2, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (43, 2, 3, 1009, 3, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (44, 2, 4, 1009, 3, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (45, 2, 5, 1009, 2, 1);
-INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id) VALUES (46, 2, 6, 1009, 1, 1);
+-- seats are generated automatically by the planes_generate_seats trigger on INSERT into planes
 
 
 INSERT INTO routes (id, origin_airport_id, destination_airport_id) VALUES (1,  1,  4);
@@ -364,12 +312,12 @@ INSERT INTO payments (id, payment_date, payment_status_id, currency_code, reserv
 INSERT INTO payments (id, payment_date, payment_status_id, currency_code, reservations_id) VALUES (15, DATE '2026-05-16', 2,  'EUR', 15);
 
 
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (1, 1, 5, 1001);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (1, 11, 6, 1001);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (2, 2, 21, 1002);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (3, 3, 7, 1001);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (4, 4, 22, 1002);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (9, 9, 31, 1007);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (11, 1, 43, 1009);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (1,  1,    7, 1001);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (1,  11,   8, 1001);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (2,  2,  196, 1002);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (3,  3,    9, 1001);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (4,  4,  197, 1002);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (9,  9, 1665, 1007);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (11, 1, 1965, 1009);
 
 COMMIT;

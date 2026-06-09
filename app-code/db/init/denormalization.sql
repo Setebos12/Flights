@@ -1,3 +1,46 @@
+-- generowanie miejsc przy dodaniu samolotu
+
+CREATE OR REPLACE TRIGGER planes_generate_seats
+AFTER INSERT ON planes
+FOR EACH ROW
+DECLARE
+v_id        NUMBER;
+    v_seat_type NUMBER;
+    v_class_id  NUMBER;
+    v_full_rows NUMBER := TRUNC(:new.seat_count / 6);
+    v_remainder NUMBER := MOD(:new.seat_count, 6);
+
+    PROCEDURE insert_seat(p_row NUMBER, p_col NUMBER) IS
+BEGIN
+        v_id := v_id + 1;
+CASE p_col
+            WHEN 1 THEN v_seat_type := 1;
+WHEN 6 THEN v_seat_type := 1;
+WHEN 2 THEN v_seat_type := 2;
+WHEN 5 THEN v_seat_type := 2;
+ELSE        v_seat_type := 3;
+END CASE;
+        IF p_row <= 2 THEN v_class_id := 3; ELSE v_class_id := 1; END IF;
+INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id)
+VALUES (v_id, p_row, p_col, :new.serial_number, v_seat_type, v_class_id);
+END;
+BEGIN
+SELECT NVL(MAX(id), 0) INTO v_id FROM seats;
+
+FOR r IN 1 .. v_full_rows LOOP
+        FOR c IN 1 .. 6 LOOP
+            insert_seat(r, c);
+END LOOP;
+END LOOP;
+
+    IF v_remainder > 0 THEN
+        FOR c IN 1 .. v_remainder LOOP
+            insert_seat(v_full_rows + 1, c);
+END LOOP;
+END IF;
+END;
+/
+
 -- kolumna wyliczana payment amount
 
 CREATE OR REPLACE TRIGGER payment_calculation
