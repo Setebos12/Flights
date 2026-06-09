@@ -58,6 +58,7 @@ Pozwala zagregować statystyki dotyczące ilości klientów i całkowitych przyc
 <br>
 
 
-
-
-
+### USERS:
+dla przetestowania działania aplikacji należy logowac się na podanych userów:
+1. ADMIN - email: anna.nowak@email.pl - hasło: Secure99!
+2. USER - email: piotr.wisniewski@email.pl - hasło: Haslo5678
