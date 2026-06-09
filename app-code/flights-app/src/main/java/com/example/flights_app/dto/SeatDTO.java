@@ -11,4 +11,5 @@ public class SeatDTO {
     private String label;
     private String status;
     private String seatType;
+    private String className;
 }

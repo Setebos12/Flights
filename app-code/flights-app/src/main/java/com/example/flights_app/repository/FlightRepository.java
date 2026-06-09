@@ -21,6 +21,7 @@ public interface FlightRepository extends JpaRepository<Flight, Long> {
     AND (:date IS NULL OR TRUNC(f.departure_date_time) = :date)
     AND (:minPrice IS NULL OR f.price >= :minPrice)
     AND (:maxPrice IS NULL OR f.price <= :maxPrice)
+    AND f.departure_date_time >= SYSDATE
     ORDER BY f.departure_date_time ASC
 """, nativeQuery = true)
     // cast na date bez godziny i strefy czasowej

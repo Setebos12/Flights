@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf"
+import { useState, useEffect } from "react"
 
 const formatEuro = (amount) => {
   const value = Number(amount)
@@ -6,21 +7,32 @@ const formatEuro = (amount) => {
   return new Intl.NumberFormat("en-GB", { style: "currency", currency: "EUR" }).format(value)
 }
 
+const formatDatetime = (dt) => {
+  if (!dt) return ""
+  return `${dt.substring(8, 10)}.${dt.substring(5, 7)}.${dt.substring(0, 4)} ${dt.substring(11, 16)}`
+}
+
 const buildPdfText = (ticket) => {
-  const passengers = ticket.passengers.map((p, index) => `  ${index + 1}. ${p.firstName} ${p.lastName} — Seat ${p.seatLabel || ticket.seatLabels[index] || "TBD"}`).join("\n")
+  const passengers = ticket.passengers.map((p, index) =>
+    `  ${index + 1}. ${p.firstName} ${p.lastName} - Seat ${p.seatLabel || ticket.seatLabels[index] || "TBD"}`
+  ).join("\n")
   const services = ticket.services.length
-    ? ticket.services.map((s) => `  • ${s.name} — ${formatEuro(s.price)}`).join("\n")
+    ? ticket.services.map((s) => `  - ${s.serviceName || s.name || "Service"}: ${formatEuro(s.price)}`).join("\n")
     : "  None"
+
+  const originLabel = [ticket.originCity, ticket.originAirportName].filter(Boolean).join(", ")
+  const destLabel = [ticket.destinationCity, ticket.destinationAirportName].filter(Boolean).join(", ")
 
   return {
     header: "Boarding Pass",
     label: `Booking ID: ${ticket.reservationId || ticket.id}`,
     items: [
       { title: "Flight", value: `${ticket.airlineName} ${ticket.flightNumber || ""}` },
-      { title: "Route", value: `${ticket.originCity} → ${ticket.destinationCity}` },
-      { title: "Departure", value: ticket.departureDate },
+      { title: "From", value: originLabel || ticket.originCity },
+      { title: "To", value: destLabel || ticket.destinationCity },
+      { title: "Departure", value: ticket.departureDate || formatDatetime(ticket.departureDatetime) || "N/A" },
       { title: "Seats", value: ticket.seatLabels.join(", ") },
-      { title: "Total Paid", value: ticket.totalPrice ? formatEuro(ticket.totalPrice) : "TBD" },
+      { title: "Total", value: ticket.totalPrice ? formatEuro(ticket.totalPrice) : "TBD" },
       { title: "Booked at", value: new Date(ticket.bookedAt).toLocaleString() },
     ],
     passengers,
@@ -49,6 +61,22 @@ const createQrCodeUrl = (ticket) => {
   return `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(JSON.stringify(qrData))}`
 }
 
+const renderSection = (doc, title, text, top, maxWidth = 480) => {
+  doc.setFontSize(11)
+  doc.setFont("helvetica", "bold")
+  doc.setTextColor("#111827")
+  doc.text(title, 40, top)
+  top += 16
+
+  doc.setFontSize(10)
+  doc.setFont("helvetica", "normal")
+  doc.setTextColor("#374151")
+  const lines = doc.splitTextToSize(text, maxWidth)
+  doc.text(lines, 40, top)
+  top += lines.length * 14 + 12
+  return top
+}
+
 const downloadTicket = async (ticket) => {
   const fileName = `boarding-pass-${ticket.reservationId || ticket.id}.pdf`
   const doc = new jsPDF({ unit: "pt", format: "a4" })
@@ -58,60 +86,94 @@ const downloadTicket = async (ticket) => {
 
   doc.setFontSize(22)
   doc.setFont("helvetica", "bold")
+  doc.setTextColor("#111827")
   doc.text(pdf.header, 40, 60)
 
   doc.setFontSize(12)
+  doc.setFont("helvetica", "normal")
   doc.setTextColor("#4b5563")
-  doc.text(pdf.label, 40, 90)
+  doc.text(pdf.label, 40, 82)
 
-  doc.addImage(qrDataUrl, "PNG", 395, 60, 130, 130)
+  doc.addImage(qrDataUrl, "PNG", 400, 40, 130, 130)
   doc.setFontSize(9)
   doc.setTextColor("#6b7280")
-  doc.text("Scan at the gate", 410, 200)
+  doc.text("Scan at the gate", 415, 182)
 
-  let top = 120
+  let top = 110
   doc.setFont("helvetica", "normal")
   pdf.items.forEach((item) => {
-    doc.setFontSize(10)
+    doc.setFontSize(9)
     doc.setTextColor("#6b7280")
     doc.text(`${item.title}:`, 40, top)
-    doc.setFontSize(12)
+    doc.setFontSize(11)
     doc.setTextColor("#111827")
-    doc.text(item.value, 130, top)
-    top += 22
+    const valueLines = doc.splitTextToSize(item.value, 320)
+    doc.text(valueLines, 130, top)
+    top += Math.max(valueLines.length * 14, 18)
   })
 
-  top += 10
+  top += 8
   doc.setDrawColor("#d1d5db")
   doc.setLineWidth(0.5)
   doc.line(40, top, 555, top)
-  top += 24
+  top += 20
+
+  top = renderSection(doc, "Passengers", pdf.passengers, top)
+  top = renderSection(doc, "Extras", pdf.services, top)
+
+  top += 8
+  doc.setDrawColor("#d1d5db")
+  doc.setLineWidth(0.5)
+  doc.line(40, top, 555, top)
+  top += 18
 
   doc.setFontSize(11)
+  doc.setFont("helvetica", "bold")
   doc.setTextColor("#111827")
-  doc.text("Passengers:", 40, top)
-  top += 18
-  doc.setFontSize(10)
-  doc.setTextColor("#374151")
-  doc.text(pdf.passengers, 40, top, { maxWidth: 520 })
+  doc.text("Total:", 40, top)
+  doc.setFontSize(13)
+  const totalText = ticket.totalPrice ? formatEuro(ticket.totalPrice) : "TBD"
+  doc.text(totalText, 555, top, { align: "right" })
 
-  top += 30
-  doc.setFontSize(11)
-  doc.setTextColor("#111827")
-  doc.text("Extras:", 40, top)
-  top += 18
-  doc.setFontSize(10)
-  doc.setTextColor("#374151")
-  doc.text(pdf.services, 40, top, { maxWidth: 520 })
-
-  doc.setFontSize(10)
-  doc.setTextColor("#6b7280")
-  doc.text("Generated by Flights App", 40, 780)
+  doc.setFontSize(9)
+  doc.setFont("helvetica", "normal")
+  doc.setTextColor("#9ca3af")
+  doc.text("Generated by Flights App", 40, 810)
 
   doc.save(fileName)
 }
 
-export default function MyTickets({ tickets = [], user }) {
+const authFetch = (url, options = {}) => {
+  const token = localStorage.getItem("token")
+  return fetch(url, {
+    ...options,
+    headers: { Authorization: token ? `Bearer ${token}` : "", ...options.headers },
+  })
+}
+
+const payReservation = async (reservationId) => {
+  const response = await authFetch(`http://localhost:8080/api/reservations/${reservationId}/pay`, { method: "POST" })
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(text || "Payment failed")
+  }
+}
+
+const cancelReservationRequest = async (reservationId) => {
+  const response = await authFetch(`http://localhost:8080/api/reservations/${reservationId}/cancel`, { method: "POST" })
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(text || "Cancellation failed")
+  }
+}
+
+const isMoreThan24hBefore = (departureDatetime) => {
+  if (!departureDatetime) return false
+  const departure = new Date(departureDatetime)
+  return departure.getTime() - Date.now() > 24 * 60 * 60 * 1000
+}
+
+export default function MyTickets({ tickets = [], user, onRemoveStaleTickets }) {
   if (!user) {
     return (
       <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
@@ -129,6 +191,52 @@ export default function MyTickets({ tickets = [], user }) {
     )
   }
 
+  const [payingId, setPayingId] = useState(null)
+  const [payError, setPayError] = useState("")
+  const [cancellingId, setCancellingId] = useState(null)
+  const [cancelError, setCancelError] = useState("")
+  const [reservationStatuses, setReservationStatuses] = useState({})
+
+  useEffect(() => {
+    const ids = tickets.map((t) => t.reservationId).filter(Boolean)
+    if (!ids.length) return
+    authFetch(`http://localhost:8080/api/reservations/statuses?ids=${ids.join(",")}`)
+      .then((res) => res.ok ? res.json() : {})
+      .then((data) => {
+        setReservationStatuses(data)
+        const existingIds = new Set(Object.keys(data).map(Number))
+        const staleIds = ids.filter((id) => !existingIds.has(id))
+        if (staleIds.length > 0) onRemoveStaleTickets?.(staleIds)
+      })
+      .catch(() => {})
+  }, [tickets])
+
+  const handlePay = async (ticket) => {
+    setPayingId(ticket.reservationId)
+    setPayError("")
+    try {
+      await payReservation(ticket.reservationId)
+      setReservationStatuses((prev) => ({ ...prev, [ticket.reservationId]: "PAID" }))
+    } catch (err) {
+      setPayError(err.message || "Payment failed")
+    } finally {
+      setPayingId(null)
+    }
+  }
+
+  const handleCancel = async (ticket) => {
+    setCancellingId(ticket.reservationId)
+    setCancelError("")
+    try {
+      await cancelReservationRequest(ticket.reservationId)
+      setReservationStatuses((prev) => ({ ...prev, [ticket.reservationId]: "CANCELLED" }))
+    } catch (err) {
+      setCancelError(err.message || "Cancellation failed")
+    } finally {
+      setCancellingId(null)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
@@ -136,12 +244,29 @@ export default function MyTickets({ tickets = [], user }) {
         <p className="text-sm text-slate-500 dark:text-slate-400">All saved bookings and boarding passes for {user.email}</p>
       </div>
 
-      {tickets.map((ticket) => (
-        <div key={ticket.id} className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-950">
+      {payError && <p className="text-red-600 text-sm px-2">{payError}</p>}
+      {cancelError && <p className="text-red-600 text-sm px-2">{cancelError}</p>}
+
+      {tickets.map((ticket) => {
+        const status = reservationStatuses[ticket.reservationId]
+        const isPaid = status === "PAID"
+        const isCancelled = status === "CANCELLED"
+        const canCancel = !isPaid && !isCancelled && isMoreThan24hBefore(ticket.departureDatetime)
+
+        return (
+        <div
+          key={ticket.id}
+          className={`rounded-3xl border p-6 shadow-sm ${isCancelled ? "border-red-200 bg-red-50/50 dark:border-red-900 dark:bg-red-950/20 opacity-70" : "border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950"}`}
+        >
           <div className="grid gap-4 md:grid-cols-[1fr_minmax(220px,260px)]">
             <div className="space-y-4">
               <div>
-                <p className="text-sm uppercase tracking-wide text-blue-700">Boarding pass</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm uppercase tracking-wide text-blue-700">Boarding pass</p>
+                  {isCancelled && (
+                    <span className="rounded-full bg-red-100 px-3 py-0.5 text-xs font-semibold text-red-700 dark:bg-red-900 dark:text-red-300">Cancelled</span>
+                  )}
+                </div>
                 <h3 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{ticket.originCity} → {ticket.destinationCity}</h3>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{ticket.airlineName} {ticket.flightNumber}</p>
               </div>
@@ -151,20 +276,27 @@ export default function MyTickets({ tickets = [], user }) {
               </div>
             </div>
             <div className="rounded-3xl bg-white p-4 text-center shadow-sm dark:bg-slate-900">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(JSON.stringify({
-                  id: ticket.reservationId || ticket.id,
-                  flight: `${ticket.airlineName} ${ticket.flightNumber || ""}`,
-                  route: `${ticket.originCity} → ${ticket.destinationCity}`,
-                  seats: ticket.seatLabels,
-                }))}`}
-                alt="Boarding pass QR code"
-                className="mx-auto h-40 w-40 rounded-3xl border border-slate-200 bg-slate-100 dark:border-slate-700"
-              />
+              {isCancelled ? (
+                <div className="mx-auto h-40 w-40 rounded-3xl border border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30 flex items-center justify-center">
+                  <span className="text-red-400 text-sm font-medium">Cancelled</span>
+                </div>
+              ) : (
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(JSON.stringify({
+                    id: ticket.reservationId || ticket.id,
+                    flight: `${ticket.airlineName} ${ticket.flightNumber || ""}`,
+                    route: `${ticket.originCity} → ${ticket.destinationCity}`,
+                    seats: ticket.seatLabels,
+                  }))}`}
+                  alt="Boarding pass QR code"
+                  className="mx-auto h-40 w-40 rounded-3xl border border-slate-200 bg-slate-100 dark:border-slate-700"
+                />
+              )}
               <p className="mt-3 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Gate scan code</p>
               <button
                 onClick={() => downloadTicket(ticket)}
-                className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
+                disabled={isCancelled}
+                className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Download ticket
               </button>
@@ -175,12 +307,13 @@ export default function MyTickets({ tickets = [], user }) {
             <div className="rounded-3xl bg-white p-4 shadow-sm dark:bg-slate-900">
               <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Departure</p>
               <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">{ticket.departureDate}</p>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{ticket.originCity}</p>
+              <p className="mt-1 text-sm font-medium text-slate-700 dark:text-slate-200">{ticket.originCity}</p>
+              {ticket.originAirportName && <p className="text-xs text-slate-500 dark:text-slate-400">{ticket.originAirportName}</p>}
             </div>
             <div className="rounded-3xl bg-white p-4 shadow-sm dark:bg-slate-900">
               <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Arrival</p>
               <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">{ticket.destinationCity}</p>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{ticket.destinationCity}</p>
+              {ticket.destinationAirportName && <p className="text-xs text-slate-500 dark:text-slate-400">{ticket.destinationAirportName}</p>}
             </div>
             <div className="rounded-3xl bg-white p-4 shadow-sm dark:bg-slate-900">
               <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Seats</p>
@@ -207,7 +340,7 @@ export default function MyTickets({ tickets = [], user }) {
                 {ticket.services.length ? (
                   ticket.services.map((service) => (
                     <div key={service.id} className="flex items-center justify-between rounded-2xl bg-slate-100 p-3 dark:bg-slate-950">
-                      <span>{service.name}</span>
+                      <span>{service.serviceName || service.name || "–"}</span>
                       <span className="font-semibold">{service.price ? formatEuro(service.price) : "–"}</span>
                     </div>
                   ))
@@ -220,16 +353,44 @@ export default function MyTickets({ tickets = [], user }) {
 
           <div className="mt-6 flex flex-col gap-4 rounded-3xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
             <div className="flex items-center justify-between">
-              <span>Total paid</span>
+              <span>Total</span>
               <span className="font-semibold text-slate-900 dark:text-white">{ticket.totalPrice ? formatEuro(ticket.totalPrice) : "TBD"}</span>
             </div>
             <div className="flex items-center justify-between">
               <span>Booked at</span>
               <span>{new Date(ticket.bookedAt).toLocaleString()}</span>
             </div>
+            <div className="flex items-center justify-between">
+              <span>Payment</span>
+              {isCancelled ? (
+                <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-900 dark:text-red-300">Cancelled</span>
+              ) : isPaid ? (
+                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">Paid</span>
+              ) : (
+                <div className="flex items-center gap-2">
+                  {canCancel && (
+                    <button
+                      onClick={() => handleCancel(ticket)}
+                      disabled={cancellingId === ticket.reservationId}
+                      className="rounded-xl bg-red-500 hover:bg-red-600 px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-60"
+                    >
+                      {cancellingId === ticket.reservationId ? "Cancelling…" : "Cancel"}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handlePay(ticket)}
+                    disabled={payingId === ticket.reservationId}
+                    className="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-60"
+                  >
+                    {payingId === ticket.reservationId ? "Processing…" : "Pay now"}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

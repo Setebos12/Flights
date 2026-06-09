@@ -17,13 +17,18 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.dao.EmptyResultDataAccessException;
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,9 +45,10 @@ public class ReservationService {
 
         Long serialNumber = flight.getPlane().getSerialNumber();
         List<SeatDTO> seats = jdbcTemplate.query(
-                "SELECT s.ROW_NR, s.COLUMN_NR, st.TYPE AS TYPE_NAME " +
+                "SELECT s.ROW_NR, s.COLUMN_NR, st.TYPE AS TYPE_NAME, c.TYPE AS CLASS_NAME " +
                         "FROM SEATS s " +
                         "LEFT JOIN SEAT_TYPE st ON s.SEAT_TYPE_ID = st.ID " +
+                        "LEFT JOIN CLASS c ON s.CLASS_ID = c.ID " +
                         "WHERE s.SERIAL_NUMBER = ? " +
                         "ORDER BY s.ROW_NR, s.COLUMN_NR",
                 new Object[]{serialNumber},
@@ -50,7 +56,7 @@ public class ReservationService {
                     int row = rs.getInt("ROW_NR");
                     int col = rs.getInt("COLUMN_NR");
                     String label = row + String.valueOf((char) ('A' + col - 1));
-                    return new SeatDTO(row, col, label, "available", rs.getString("TYPE_NAME"));
+                    return new SeatDTO(row, col, label, "available", rs.getString("TYPE_NAME"), rs.getString("CLASS_NAME"));
                 }
         );
 
@@ -87,7 +93,7 @@ public class ReservationService {
                     int index = (row - 1) * columns + col;
                     if (index > seatCount) break;
                     String label = row + String.valueOf((char) ('A' + col - 1));
-                    seats.add(new SeatDTO(row, col, label, "available", null));
+                    seats.add(new SeatDTO(row, col, label, "available", null, null));
                 }
             }
             maxRow = rows;
@@ -259,6 +265,109 @@ public class ReservationService {
                 createdSeats,
                 "Reservation completed successfully"
         );
+    }
+
+    public Map<Long, String> getReservationStatuses(List<Long> reservationIds) {
+        if (reservationIds == null || reservationIds.isEmpty()) return Map.of();
+
+        String placeholders = reservationIds.stream().map(id -> "?").collect(Collectors.joining(","));
+
+        // only include IDs that actually exist in RESERVATIONS — missing ones are stale (e.g. after DB wipe)
+        Map<Long, String> result = new LinkedHashMap<>();
+        jdbcTemplate.query(
+                "SELECT ID FROM RESERVATIONS WHERE ID IN (" + placeholders + ")",
+                reservationIds.toArray(),
+                rs -> { result.put(rs.getLong("ID"), "PENDING"); }
+        );
+
+        if (!result.isEmpty()) {
+            String existingPlaceholders = result.keySet().stream().map(id -> "?").collect(Collectors.joining(","));
+            jdbcTemplate.query(
+                    "SELECT RESERVATIONS_ID, PAYMENT_STATUS_ID FROM PAYMENTS " +
+                    "WHERE PAYMENT_STATUS_ID IN (2, 6) AND RESERVATIONS_ID IN (" + existingPlaceholders + ")",
+                    result.keySet().toArray(),
+                    rs -> {
+                        Long resId = rs.getLong("RESERVATIONS_ID");
+                        int statusId = rs.getInt("PAYMENT_STATUS_ID");
+                        result.put(resId, statusId == 2 ? "PAID" : "CANCELLED");
+                    }
+            );
+        }
+        return result;
+    }
+
+    @Transactional
+    public void cancelReservation(Long reservationId, String username) {
+        User user = userRepository.findByEmailAddress(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Long ownerId;
+        try {
+            ownerId = jdbcTemplate.queryForObject(
+                    "SELECT USER_ID FROM RESERVATIONS WHERE ID = ?", Long.class, reservationId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new RuntimeException("Reservation not found: " + reservationId);
+        }
+        if (ownerId == null || !ownerId.equals(user.getId())) {
+            throw new RuntimeException("Access denied");
+        }
+
+        Integer statusCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM PAYMENTS WHERE RESERVATIONS_ID = ? AND PAYMENT_STATUS_ID IN (2, 6)",
+                Integer.class, reservationId);
+        if (statusCount != null && statusCount > 0) {
+            throw new RuntimeException("Reservation is already paid or cancelled");
+        }
+
+        java.time.OffsetDateTime departure = jdbcTemplate.queryForObject(
+                "SELECT f.DEPARTURE_DATE_TIME FROM FLIGHTS f " +
+                "JOIN RESERVATIONS r ON f.ID = r.FLIGHTS_ID WHERE r.ID = ?",
+                java.time.OffsetDateTime.class, reservationId);
+        if (departure == null || java.time.OffsetDateTime.now().plusHours(24).isAfter(departure)) {
+            throw new RuntimeException("Cannot cancel: less than 24 hours before departure");
+        }
+
+        jdbcTemplate.update("DELETE FROM BOARDING_PASS WHERE RESERVATIONS_ID = ?", reservationId);
+        jdbcTemplate.update("DELETE FROM RESERVATIONS_EXTRA_SERVICES WHERE RESERVATIONS_ID = ?", reservationId);
+        jdbcTemplate.update("DELETE FROM RESERVATIONS_PASSENGERS WHERE RESERVATIONS_ID = ?", reservationId);
+
+        Long paymentId = jdbcTemplate.queryForObject("SELECT NVL(MAX(ID), 0) + 1 FROM PAYMENTS", Long.class);
+        jdbcTemplate.update(
+                "INSERT INTO PAYMENTS (ID, PAYMENT_DATE, PAYMENT_STATUS_ID, CURRENCY_CODE, RESERVATIONS_ID) " +
+                "VALUES (?, SYSDATE, 6, 'EUR', ?)",
+                paymentId, reservationId);
+    }
+
+    @Transactional
+    public void payReservation(Long reservationId, String username) {
+        User user = userRepository.findByEmailAddress(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Long ownerId;
+        try {
+            ownerId = jdbcTemplate.queryForObject(
+                    "SELECT USER_ID FROM RESERVATIONS WHERE ID = ?", Long.class, reservationId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new RuntimeException("Reservation not found: " + reservationId);
+        }
+        if (ownerId == null || !ownerId.equals(user.getId())) {
+            throw new RuntimeException("Access denied: reservation belongs to a different user");
+        }
+
+        Integer existing = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM PAYMENTS WHERE RESERVATIONS_ID = ? AND PAYMENT_STATUS_ID = 2",
+                Integer.class, reservationId);
+        if (existing != null && existing > 0) {
+            throw new RuntimeException("Reservation already paid");
+        }
+
+        Long paymentId = jdbcTemplate.queryForObject(
+                "SELECT NVL(MAX(ID), 0) + 1 FROM PAYMENTS", Long.class);
+
+        jdbcTemplate.update(
+                "INSERT INTO PAYMENTS (ID, PAYMENT_DATE, PAYMENT_STATUS_ID, CURRENCY_CODE, RESERVATIONS_ID) " +
+                "VALUES (?, SYSDATE, 2, 'EUR', ?)",
+                paymentId, reservationId);
     }
 
     private int parseRow(String seatLabel) {

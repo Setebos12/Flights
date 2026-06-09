@@ -147,12 +147,18 @@ export default function BookingModal({ flight, onClose, onComplete }) {
         airlineName: flight.airlineName,
         flightNumber: flight.flightNumber ?? "",
         originCity: flight.originCity,
+        originAirportName: flight.originAirportName ?? "",
         destinationCity: flight.destinationCity,
-        departureDate: flight.departureDate || flight.departureTime || flight.date || "",
+        destinationAirportName: flight.destinationAirportName ?? "",
+        departureDatetime: flight.departureDatetime ?? "",
+        departureDate: flight.departureDatetime
+          ? `${flight.departureDatetime.substring(8, 10)}.${flight.departureDatetime.substring(5, 7)}.${flight.departureDatetime.substring(0, 4)} ${flight.departureDatetime.substring(11, 16)}`
+          : "",
         seatLabels: selectedSeats,
         passengers,
         services: seatMap.services.filter((service) => selectedServices.includes(service.id)),
         totalPrice,
+        paid: false,
         bookedAt: new Date().toISOString(),
       }
       onComplete?.({ ticketCount: selectedSeats.length, tickets: [boardingTicket] })
@@ -171,8 +177,8 @@ export default function BookingModal({ flight, onClose, onComplete }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
-      <div className="w-full max-w-5xl rounded-3xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-slate-700">
+      <div className="w-full max-w-5xl max-h-[90vh] rounded-3xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden flex flex-col">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
           <div>
             <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Flight booking</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">{flight.originCity} → {flight.destinationCity} • {flight.airlineName}</p>
@@ -180,15 +186,17 @@ export default function BookingModal({ flight, onClose, onComplete }) {
           <button onClick={onClose} className="text-slate-500 hover:text-slate-900 dark:hover:text-white text-sm">Close</button>
         </div>
 
-        <div className="px-6 py-5">
+        <div className="px-6 pt-5 flex-shrink-0">
           <div className="flex flex-wrap gap-2 text-xs font-medium text-slate-500 uppercase tracking-wide mb-4">
             <span className={step === 1 ? "text-blue-700" : ""}>1. Seat</span>
             <span className={step === 2 ? "text-blue-700" : ""}>2. Services</span>
             <span className={step === 3 ? "text-blue-700" : ""}>3. Passengers</span>
             <span className={step === 4 ? "text-blue-700" : ""}>4. Confirmation</span>
           </div>
+        </div>
 
-          {loading && <p className="text-slate-500 text-center">Loading seat map…</p>}
+        <div className="px-6 pb-4 overflow-y-auto flex-1 min-h-0">
+          {loading && <p className="text-slate-500 text-center py-8">Loading seat map…</p>}
           {error && !loading && <p className="text-red-600 text-center mb-4">{error}</p>}
 
           {!loading && seatMap && !bookingResult && (
@@ -226,38 +234,58 @@ export default function BookingModal({ flight, onClose, onComplete }) {
                       </button>
                     </div>
                     <div className="relative space-y-2 rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-950/70">
-                      {seatRows.map((rowSeats) => (
-                        <div key={rowSeats[0]?.row} className="flex items-center gap-2">
-                          <div className="w-8 text-sm font-semibold text-slate-500">Row {rowSeats[0]?.row}</div>
-                          <div className="grid grid-cols-10 gap-2 flex-1">
-                            {rowSeats.map((seat) => {
-                              const selected = selectedSeats.includes(seat.label)
-                              return (
-                                <button
-                                  key={seat.label}
-                                  type="button"
-                                  onClick={() => toggleSeat(seat.label)}
-                                  disabled={seat.status !== "available" && !selected}
-                                  className={`rounded-2xl border px-3 py-2 text-sm font-semibold transition ${
-                                    seat.status === "occupied"
-                                      ? "border-slate-300 bg-slate-200 text-slate-500 cursor-not-allowed"
-                                      : selected
-                                      ? "border-blue-700 bg-blue-700 text-white"
-                                      : "border-slate-300 bg-white text-slate-700 hover:border-blue-500 hover:text-blue-800"
-                                  }`}
-                                >
-                                  {seat.label}
-                                </button>
-                              )
-                            })}
+                      {seatRows.map((rowSeats) => {
+                        const rowClass = rowSeats[0]?.className
+                        return (
+                          <div key={rowSeats[0]?.row} className="flex items-center gap-2">
+                            <div className="w-8 text-sm font-semibold text-slate-500">{rowSeats[0]?.row}</div>
+                            <div className="flex gap-2 flex-1">
+                              {rowSeats.map((seat) => {
+                                const selected = selectedSeats.includes(seat.label)
+                                const isBusiness = rowClass === "Business" || rowClass === "First Class"
+                                const typeShort = seat.seatType === "Window" ? "W" : seat.seatType === "Middle" ? "M" : seat.seatType === "Aisle" ? "A" : ""
+                                return (
+                                  <button
+                                    key={seat.label}
+                                    type="button"
+                                    onClick={() => toggleSeat(seat.label)}
+                                    disabled={seat.status !== "available" && !selected}
+                                    title={[seat.seatType, rowClass].filter(Boolean).join(" · ")}
+                                    className={`rounded-xl border flex flex-col items-center px-2 py-1.5 text-xs font-semibold transition min-w-[2.5rem] ${
+                                      seat.status === "occupied"
+                                        ? "border-slate-300 bg-slate-200 text-slate-400 cursor-not-allowed"
+                                        : selected
+                                        ? "border-blue-700 bg-blue-700 text-white"
+                                        : isBusiness
+                                        ? "border-amber-400 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:bg-amber-950 dark:text-amber-300"
+                                        : "border-slate-300 bg-white text-slate-700 hover:border-blue-400 hover:text-blue-800 dark:bg-slate-900 dark:text-slate-200"
+                                    }`}
+                                  >
+                                    <span>{seat.label}</span>
+                                    {typeShort && <span className="text-[9px] font-normal opacity-70">{typeShort}</span>}
+                                  </button>
+                                )
+                              })}
+                            </div>
+                            {rowClass && (
+                              <div className={`text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${
+                                rowClass === "Business" || rowClass === "First Class"
+                                  ? "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300"
+                                  : "bg-slate-100 text-slate-500 dark:bg-slate-800"
+                              }`}>
+                                {rowClass}
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                     <div className="mt-4 flex flex-wrap gap-3 text-xs text-slate-500">
-                      <span>{selectedSeats.length} selected</span>
-                      <span>{availableSeatCount} available</span>
-                      <span>{seatMap.seats.filter((seat) => seat.status === "occupied").length} occupied</span>
+                      <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded border border-amber-400 bg-amber-50"></span> Business</span>
+                      <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded border border-slate-300 bg-white"></span> Economy</span>
+                      <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded bg-slate-200 border border-slate-300"></span> Occupied</span>
+                      <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded bg-blue-700"></span> Selected</span>
+                      <span className="ml-2 text-slate-400">W = Window · M = Middle · A = Aisle</span>
                     </div>
                   </div>
                 </div>
@@ -382,50 +410,51 @@ export default function BookingModal({ flight, onClose, onComplete }) {
             </div>
           )}
 
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex gap-2">
-              {step > 1 && !bookingResult && (
-                <button
-                  type="button"
-                  onClick={() => setStep((current) => Math.max(1, current - 1))}
-                  className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  Back
-                </button>
-              )}
-              {step < 4 && !bookingResult && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (canProceedToNext()) setStep((current) => Math.min(4, current + 1))
-                  }}
-                  className="rounded-xl bg-blue-700 hover:bg-blue-800 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-slate-300"
-                  disabled={!canProceedToNext()}
-                >
-                  Continue
-                </button>
-              )}
-            </div>
-            {!bookingResult && step === 4 && (
+        </div>
+
+        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 flex-shrink-0 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-2">
+            {step > 1 && !bookingResult && (
               <button
                 type="button"
-                onClick={handleConfirm}
-                disabled={isSubmitting}
-                className="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                onClick={() => setStep((current) => Math.max(1, current - 1))}
+                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
               >
-                {isSubmitting ? "Confirming..." : "Confirm booking"}
+                Back
               </button>
             )}
-            {bookingResult && (
+            {step < 4 && !bookingResult && (
               <button
                 type="button"
-                onClick={onClose}
-                className="rounded-xl bg-blue-700 hover:bg-blue-800 px-5 py-3 text-sm font-semibold text-white"
+                onClick={() => {
+                  if (canProceedToNext()) setStep((current) => Math.min(4, current + 1))
+                }}
+                className="rounded-xl bg-blue-700 hover:bg-blue-800 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                disabled={!canProceedToNext()}
               >
-                Close booking
+                Continue
               </button>
             )}
           </div>
+          {!bookingResult && step === 4 && (
+            <button
+              type="button"
+              onClick={handleConfirm}
+              disabled={isSubmitting}
+              className="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
+            >
+              {isSubmitting ? "Confirming..." : "Confirm booking"}
+            </button>
+          )}
+          {bookingResult && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl bg-blue-700 hover:bg-blue-800 px-5 py-3 text-sm font-semibold text-white"
+            >
+              Close booking
+            </button>
+          )}
         </div>
       </div>
     </div>

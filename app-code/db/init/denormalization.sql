@@ -1,3 +1,39 @@
+-- generowanie miejsc po dodaniu samolotu
+
+CREATE SEQUENCE seats_seq START WITH 1 NOCACHE ORDER;
+
+CREATE OR REPLACE TRIGGER planes_create_seats
+    AFTER INSERT ON planes
+    FOR EACH ROW
+DECLARE
+    v_seat_id      NUMBER;
+    v_num_eco_rows NUMBER;
+BEGIN
+    IF :NEW.seat_count > 0 THEN
+        -- Rząd 1: Business (class_id=3), 4 miejsca, układ: W A A W
+        FOR c IN 1..4 LOOP
+            SELECT seats_seq.NEXTVAL INTO v_seat_id FROM DUAL;
+            INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id)
+            VALUES (v_seat_id, 1, c, :NEW.serial_number,
+                    CASE WHEN c IN (1, 4) THEN 1 ELSE 3 END,
+                    3);
+        END LOOP;
+
+        -- Pozostałe rzędy: Economy (class_id=1), 6 miejsc, układ: W M A A M W
+        v_num_eco_rows := (:NEW.seat_count - 4) / 6;
+        FOR r IN 1..v_num_eco_rows LOOP
+            FOR c IN 1..6 LOOP
+                SELECT seats_seq.NEXTVAL INTO v_seat_id FROM DUAL;
+                INSERT INTO seats (id, row_nr, column_nr, serial_number, seat_type_id, class_id)
+                VALUES (v_seat_id, r + 1, c, :NEW.serial_number,
+                        CASE WHEN c IN (1, 6) THEN 1 WHEN c IN (2, 5) THEN 2 ELSE 3 END,
+                        1);
+            END LOOP;
+        END LOOP;
+    END IF;
+END;
+/
+
 -- kolumna wyliczana payment amount
 
 CREATE OR REPLACE TRIGGER payment_calculation

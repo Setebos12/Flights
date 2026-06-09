@@ -135,6 +135,12 @@ export default function App() {
     setBookingFlight(null)
   }
 
+  const handleRemoveStaleTickets = (staleIds) => {
+    const updated = myTickets.filter((t) => !staleIds.includes(t.reservationId))
+    setMyTickets(updated)
+    if (user?.userId) saveTicketsForUser(user.userId, updated)
+  }
+
   const handleBookingComplete = ({ ticketCount, tickets = [] }) => {
     if (!bookingFlight) return
     setFlights((current) => current.map((flight) => {
@@ -149,7 +155,7 @@ export default function App() {
         availableSeats,
       }
     }))
-    const updatedTickets = [...myTickets, ...tickets]
+    const updatedTickets = [...tickets, ...myTickets]
     if (user?.userId) {
       saveTicketsForUser(user.userId, updatedTickets)
     }
@@ -245,7 +251,7 @@ export default function App() {
           </>
         ) : view === "tickets" ? (
           <div className="max-w-6xl mx-auto px-4 py-6">
-            <MyTickets tickets={myTickets} user={user} />
+            <MyTickets tickets={myTickets} user={user} onRemoveStaleTickets={handleRemoveStaleTickets} />
           </div>
         ) : (
           <AnalyticsDashboard />
