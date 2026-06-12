@@ -99,6 +99,7 @@ export default function App() {
             localStorage.setItem("userId", userData.userId)
             setMyTickets(loadTicketsForUser(userData.userId))
             setIsLoginOpen(false)
+            setIsRegisterOpen(false)
             if (pendingBookingFlight) {
               setBookingFlight(pendingBookingFlight)
               setPendingBookingFlight(null)
