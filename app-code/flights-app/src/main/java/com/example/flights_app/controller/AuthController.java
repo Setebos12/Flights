@@ -60,6 +60,7 @@ public class AuthController {
         user.setId(userId);
         user.setEmailAddress(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setIsAdmin(0);
         userRepository.save(user);
 
         Passenger passenger = new Passenger();
