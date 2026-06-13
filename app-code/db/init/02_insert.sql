@@ -1,7 +1,6 @@
 ALTER TRIGGER payment_calculation ENABLE;
 ALTER TRIGGER prejoin_payments ENABLE;
 ALTER TRIGGER prejoin_flights ENABLE;
-ALTER TRIGGER prejoin_flights_currency ENABLE;
 ALTER TRIGGER prejoin_flights_seat_count ENABLE;
 ALTER TRIGGER prejoin_boarding_pass ENABLE;
 ALTER TRIGGER flights_booked_seats_I ENABLE;
@@ -336,8 +335,8 @@ INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_numb
 INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (2,  2,  196, 1002);
 INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (3,  3,    9, 1001);
 INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (4,  4,  197, 1002);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (9,  9, 1665, 1007);
-INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (11, 1, 1965, 1009);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (9,  9,  724, 1007);
+INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number) VALUES (11, 1,  841, 1009);
 
 
 COMMIT;
