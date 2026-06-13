@@ -10,6 +10,7 @@ import lombok.Data;
 public class City {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
 

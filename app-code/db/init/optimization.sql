@@ -1,7 +1,6 @@
-CREATE INDEX airports_code_idx ON airports (airport_code);
-CREATE INDEX airports_name_idx ON airports (name);
+CREATE INDEX airports_name_idx ON airports (airport_name);
 
-CREATE INDEX user_email_idx ON users (email);
+CREATE INDEX user_email_idx ON users (email_address);
 
 -- możliwe filtrowanie po: lotniskach, dacie odlotu, cenie
 CREATE INDEX flight_date_idx ON flights(departure_date_time, price);
@@ -9,7 +8,7 @@ CREATE INDEX flight_price_idx ON flights(price);
 
 CREATE INDEX flight_airlines_idx ON flights(airlines_id);
 CREATE INDEX flight_serial_number_idx ON flights(serial_number);
-CREATE INDEX flight_route_idx ON flights(route_id);
+CREATE INDEX flight_route_idx ON flights(routes_id);
 
 CREATE INDEX routes_origin_idx ON routes(origin_airport_id);
 CREATE INDEX routes_dest_idx ON routes(destination_airport_id);

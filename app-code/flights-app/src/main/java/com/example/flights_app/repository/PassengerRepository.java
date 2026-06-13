@@ -8,6 +8,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PassengerRepository extends JpaRepository<Passenger, Long> {
 
-    @Query(value = "SELECT NVL(MAX(id), 0) + 1 FROM PASSENGERS", nativeQuery = true)
-    Long getNextId();
 }

@@ -12,6 +12,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmailAddress(String emailAddress);
 
-    @Query(value = "SELECT NVL(MAX(id), 0) + 1 FROM USERS", nativeQuery = true)
-    Long getNextId();
 }
