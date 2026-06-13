@@ -27,3 +27,18 @@ CREATE INDEX reservations_users_idx ON reservations(user_id);
 CREATE INDEX reservations_flights_idx ON reservations(flights_id);
 
 CREATE INDEX payments_reservations_idx ON payments(reservations_id);
+
+CREATE OR REPLACE VIEW v_flight_search AS
+SELECT
+    f.*,
+    TRUNC(f.departure_date_time) AS departure_date, -- obliczenia pod zapytania aplikacji
+    r.id AS route_id,
+    oa.airport_code AS origin_airport_code,
+    oa.airport_name AS origin_airport_name,
+    da.airport_code AS destination_airport_code,
+    da.airport_name AS destination_airport_name
+FROM
+    flights f
+INNER JOIN routes r ON r.id = f.routes_id
+INNER JOIN airports oa ON oa.id = r.origin_airport_id
+INNER JOIN airports da ON da.id = r.destination_airport_id;
