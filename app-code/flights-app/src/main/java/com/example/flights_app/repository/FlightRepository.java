@@ -30,13 +30,7 @@ public interface FlightRepository extends JpaRepository<Flight, Long> {
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice
     );
-/*
-    private Integer row;
-    private Integer col;
-    private String label;
-    private String status;
-    private String seatType;
-    private String className; */
+
     @Query(value = "SELECT row_nr as rowNr, column_nr as colNr, type_name as seatType, class_name as className, status " +
                "FROM v_flight_seats WHERE flights_id = :flightId ORDER BY row_nr, column_nr",
        nativeQuery = true)

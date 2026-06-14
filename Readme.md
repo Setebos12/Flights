@@ -57,6 +57,57 @@ Pozwala zagregować statystyki dotyczące ilości klientów i całkowitych przyc
 
 <br>
 
+### Model fizyczny
+#### Dodane widoki
+1. Widoki części operacyjnej
+Znajdują się w pliku: [optimization.sql](./app-code/db/init/optimization.sql)
+* Widok `v_flight_search`
+    - zbiera dane często wykorzystywane do zapytania o loty w aplikacji
+    - nie jest zmaterializowany, ale zwiększa wydajność, bo możliwe jest zapamiętanie planu zapytania i optymalizacja jego wykonania
+    - wykorzystywany w funkcji `findSeatsByFlightId` w [FlightRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/FlightRepository.java)
+* Widok `v_seat_flights`
+    - zbiera informacje o siedzeniach w samolocie w celu stworzenia zestawienia zajętości miejsc wykorzystywanego w backendzie\
+    - wykorzystywany w funkcji `findFlights` w [FlightRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/FlightRepository.java)
+
+2. Widoki części analitycznej
+// TO DO
+
+#### Dodane indeksy
+Znajdują się w pliku: [optimization.sql](./app-code/db/init/optimization.sql)
+* Indeksy na kluczach głównych i wartościach unique (np. users.email_address, (routes.origin_airport_id, routes.dest_airport_id)) są tworzone automatycznie przez Oracle, co już poprawia wydajność większości wykorzystywanych zapytań
+* Indeksy na kluczach obcych - pozwalają przyspieszyć wykonanie złączeń
+* Na podstawie analizy często wykonywanych zapytań (dane z aplikacji):
+    - select a1_0.id,a1_0.airport_code,a1_0.airport_name,a1_0.city_id from airports a1_0 order by a1_0.airport_name
+        - dodany indeks na airports(airport_name), żeby przechowywać dane już posortowane
+    - Złączenie boarding_pass z reservations, seats, flights (po serial_number) w widoku v_flight_seats także można przyspieszyć indeksem na kombinację (reservations_id, seats_id, serial_number)
+    - Złączenie boarding_pass z użytkownikami można przyspieszyć zakładając indeks na kombinacji (passengers_id, reservations_id)
+    - Podczas wyszukiwania lotów w aplikacji filtrować można po: dacie odlotu, cenie (zakresowo), lotniskach przylotu i odlotu, dlatego utworzone są indeksy na kombinacjach tych wartości, przy czym:
+        - flight_date_price_idx obejmuje zarówno filtrowanie po kombinacji daty i ceny oraz samej daty
+        - Podobnie routes_origin_dest_idx i routes_dest_idx obejmuje filtrowanie po kombinacji lotnisk, jak i samego lotniska wylotu
+
+#### Dodane procedury składowane
+Znajdują się w pliku: [procedures.sql](./app-code/db/init/procedures.sql)
+* `create_reservation`
+    - Tworzy nową rezerwację i przypisuje płatność o statusie “Pending”
+    - Do aplikacji zwraca id utworzonej rezerwacji
+    - Dane potrzebne do prejoinów są przygotowywane w aplikacji, więc zerowym kosztem możemy je przekazać i od razu przypisać do wiersza płatności (payment_amount, currency_code) pomijając wykorzystanie triggera (bo wartości nie są NULL)
+    - Wykorzystanie w: [ReservationService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/ReservationService.java)
+* `add_passenger_and_boarding_pass`
+    - Dodaje pasażera do rezerwacji i przypisuje mu kartę pokładową
+    - Ponownie wykorzystujemy dane już przygotowane, żeby wypełnić atrybuty prejoinowane (serial_number, passenger_first_name, passenger_last_name, seat_row, seat_col)
+    - Wykorzystanie w: [ReservationService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/ReservationService.java)
+* `cancel_reservation`
+    - Anuluje rezerwację (jeśli to możliwe), aktualizując status płatności i usuwając wygenerowaną kartę pokładową, nieistotne już dane dotyczące pasażerów oraz dodatkowych udogodnień (żeby nie zaburzały analiz)
+    - Wykorzystanie w: [ReservationService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/ReservationService.java)
+* `pay_for_reservation`
+    - Realizacja płatności jako ustawienie status płatności na “Completed”
+    - Wykorzystanie w: [ReservationService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/ReservationService.java)
+
+#### Dodane wyzwalacze
+Znajdują się w pliku: [denormalization.sql](./app-code/db/init/denormalization.sql) <br>
+Część została już opisana wyżej jako mechanizmy zapewniające spójność danych po denormalizacji. Tutaj przedstawiamy pozostałe:
+* `planes_create_seats`
+    - Wyzwalacz pozwalający na automatyczne przypisanie miejsc i ich ustawienia do samolotu
 
 ### USERS:
 dla przetestowania działania aplikacji należy logowac się na podanych userów:

@@ -1,7 +1,5 @@
 CREATE INDEX airports_name_idx ON airports (airport_name);
 
-CREATE INDEX user_email_idx ON users (email_address);
-
 -- możliwe filtrowanie po: lotniskach, dacie odlotu, cenie
 CREATE INDEX flight_date_price_idx ON flights(departure_date_time, price);
 CREATE INDEX flight_price_idx ON flights(price);
@@ -10,7 +8,6 @@ CREATE INDEX flight_airlines_idx ON flights(airlines_id);
 CREATE INDEX flight_serial_number_idx ON flights(serial_number);
 CREATE INDEX flight_route_idx ON flights(routes_id);
 
-CREATE INDEX routes_origin_dest_idx ON routes(origin_airport_id, destination_airport_id);
 CREATE INDEX routes_dest_idx ON routes(destination_airport_id);
 
 CREATE INDEX airports_city_idx ON airports(city_id);
@@ -21,12 +18,16 @@ CREATE INDEX countries_timezome_idx ON country(time_zone_id);
 
 CREATE INDEX seats_seat_type_idx ON seats(seat_type_id);
 CREATE INDEX seats_class_idx ON seats(class_id);
-CREATE INDEX seats_row_col_idx ON seats(row_nr, column_nr);
+CREATE INDEX seats_serial_nr ON seats(serial_number);
 
 CREATE INDEX reservations_users_idx ON reservations(user_id);
 CREATE INDEX reservations_flights_idx ON reservations(flights_id);
 
 CREATE INDEX payments_reservations_idx ON payments(reservations_id);
+
+-- PRIMARY KEY (seats_id, serial_number, reservations_id, passengers_id) warto dodać indeksy na inne kombinacje
+CREATE INDEX boarding_pass_lookup_idx ON boarding_pass(reservations_id, seats_id, serial_number);
+CREATE INDEX boarding_pass_passenger_idx ON boarding_pass(passengers_id, reservations_id);
 
 CREATE OR REPLACE VIEW v_flight_search AS
 SELECT
@@ -50,18 +51,12 @@ SELECT
     s.column_nr,
     st.type AS type_name,
     c.type AS class_name,
-    CASE
-        WHEN EXISTS (
-            SELECT 1
-            FROM boarding_pass bp
-            JOIN reservations r ON bp.reservations_id = r.id
-            WHERE r.flights_id = f.id
-              AND bp.seats_id = s.id
-              AND bp.serial_number = s.serial_number
-        ) THEN 'occupied'
-        ELSE 'available'
-    END AS status
+    NVL2(bp.seats_id, 'occupied', 'available') AS status
 FROM flights f
 JOIN seats s ON f.serial_number = s.serial_number
 LEFT JOIN seat_type st ON s.seat_type_id = st.id
-LEFT JOIN class c ON s.class_id = c.id;
+LEFT JOIN class c ON s.class_id = c.id
+LEFT JOIN reservations r ON r.flights_id = f.id
+LEFT JOIN boarding_pass bp ON bp.reservations_id = r.id
+    AND bp.seats_id = s.id
+    AND bp.serial_number = s.serial_number;
