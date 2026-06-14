@@ -39,6 +39,7 @@ END;
 CREATE OR REPLACE TRIGGER payment_calculation
 BEFORE INSERT OR UPDATE ON payments
 FOR EACH ROW
+WHEN (new.payment_amount IS NULL)
 DECLARE
     v_flight_price flights.price%TYPE;
     v_extra_sum NUMBER(9,2);
@@ -60,8 +61,9 @@ END;
 -- pre-joiny kluczy obcych
 
 CREATE OR REPLACE TRIGGER prejoin_payments
-BEFORE INSERT OR UPDATE OF currency_code ON payments
+BEFORE INSERT OR UPDATE ON payments
 FOR EACH ROW
+WHEN (new.currency_code IS NULL)
 BEGIN
     SELECT f.CURRENCY_CODE INTO :new.CURRENCY_CODE
     FROM FLIGHTS f
@@ -104,28 +106,45 @@ DECLARE
     v_origin_code airports.airport_code%TYPE;
     v_dest_code airports.airport_code%TYPE;
 BEGIN
-    SELECT p.first_name, p.last_name INTO v_passenger_name, v_passenger_last_name
-    FROM passengers p
-    JOIN reservations_passengers rp ON p.id = rp.passengers_id
-    WHERE rp.reservations_id = :new.reservations_id AND rp.passengers_id = :new.passengers_id;
-
-    SELECT row_nr, column_nr INTO v_seat_row, v_seat_col
-    FROM seats
-    WHERE id = :new.seats_id and serial_number = :new.serial_number;
-
-    SELECT f.departure_date_time INTO v_flight_dep_time
-    FROM flights f
-    JOIN reservations r ON f.id = r.flights_id
-    WHERE r.id = :new.reservations_id;
-
-    SELECT a1.airport_code, a2.airport_code INTO v_origin_code, v_dest_code
-    FROM flights f
-    JOIN routes rt ON f.routes_id = rt.id
-    JOIN airports a1 ON rt.origin_airport_id = a1.id
-    JOIN airports a2 ON rt.destination_airport_id = a2.id
-    JOIN reservations r ON f.id = r.flights_id
-    WHERE r.id = :new.reservations_id;
-
+    BEGIN
+        SELECT p.first_name, p.last_name INTO v_passenger_name, v_passenger_last_name
+        FROM passengers p
+        JOIN reservations_passengers rp ON p.id = rp.passengers_id
+        WHERE rp.reservations_id = :new.reservations_id AND rp.passengers_id = :new.passengers_id;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RAISE_APPLICATION_ERROR(-20001, 'Passenger not found for the given reservation.');
+    END;
+    BEGIN
+        SELECT row_nr, column_nr INTO v_seat_row, v_seat_col
+        FROM seats
+        WHERE id = :new.seats_id and serial_number = :new.serial_number;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RAISE_APPLICATION_ERROR(-20002, 'Seat not found for the given serial number.');
+    END;
+    BEGIN
+        SELECT f.departure_date_time INTO v_flight_dep_time
+        FROM flights f
+        JOIN reservations r ON f.id = r.flights_id
+        WHERE r.id = :new.reservations_id;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RAISE_APPLICATION_ERROR(-20003, 'Flight not found for the given reservation.');
+    END;
+    BEGIN
+        SELECT a1.airport_code, a2.airport_code INTO v_origin_code, v_dest_code
+        FROM flights f
+        JOIN routes rt ON f.routes_id = rt.id
+        JOIN airports a1 ON rt.origin_airport_id = a1.id
+        JOIN airports a2 ON rt.destination_airport_id = a2.id
+        JOIN reservations r ON f.id = r.flights_id
+        WHERE r.id = :new.reservations_id;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RAISE_APPLICATION_ERROR(-20004, 'Route not found for the given reservation.');
+    END;
+    BEGIN
     :new.passenger_first_name := v_passenger_name;
     :new.passenger_last_name := v_passenger_last_name;
     :new.seat_row := v_seat_row;
@@ -133,6 +152,7 @@ BEGIN
     :new.flight_departure_date_time := v_flight_dep_time;
     :new.arrival_airport_code := v_dest_code;
     :new.departure_airport_code := v_origin_code;
+    END;
 END;
 /
 

@@ -10,6 +10,7 @@ import lombok.Data;
 public class Airport {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
 

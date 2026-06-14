@@ -11,6 +11,7 @@ import java.time.OffsetDateTime;
 public class Flight {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
 
