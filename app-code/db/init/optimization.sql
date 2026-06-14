@@ -51,12 +51,18 @@ SELECT
     s.column_nr,
     st.type AS type_name,
     c.type AS class_name,
-    NVL2(bp.seats_id, 'occupied', 'available') AS status
+    CASE
+        WHEN EXISTS (
+            SELECT 1
+            FROM boarding_pass bp
+            JOIN reservations r ON bp.reservations_id = r.id
+            WHERE r.flights_id = f.id
+              AND bp.seats_id = s.id
+              AND bp.serial_number = s.serial_number
+        ) THEN 'occupied'
+        ELSE 'available'
+    END AS status
 FROM flights f
 JOIN seats s ON f.serial_number = s.serial_number
 LEFT JOIN seat_type st ON s.seat_type_id = st.id
-LEFT JOIN class c ON s.class_id = c.id
-LEFT JOIN reservations r ON r.flights_id = f.id
-LEFT JOIN boarding_pass bp ON bp.reservations_id = r.id
-    AND bp.seats_id = s.id
-    AND bp.serial_number = s.serial_number;
+LEFT JOIN class c ON s.class_id = c.id;
