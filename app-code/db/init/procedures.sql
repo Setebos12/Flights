@@ -45,8 +45,8 @@ BEGIN
     INSERT INTO reservations_passengers (reservations_id, passengers_id)
     VALUES (p_reservation_id, p_new_passenger_id);
 
-    INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number, seat_row, seat_col)
-    VALUES (p_reservation_id, p_new_passenger_id, v_seat_id, v_serial_number, p_seat_row, p_seat_col);
+    INSERT INTO boarding_pass (reservations_id, passengers_id, seats_id, serial_number, passenger_first_name, passenger_last_name, seat_row, seat_col)
+    VALUES (p_reservation_id, p_new_passenger_id, v_seat_id, v_serial_number, TRIM(p_first_name), TRIM(p_last_name), p_seat_row, p_seat_col);
 END;
 /
 
@@ -82,7 +82,7 @@ BEGIN
     DELETE FROM reservations_extra_services WHERE reservations_id = p_reservation_id;
     DELETE FROM reservations_passengers WHERE reservations_id = p_reservation_id;
 
-    UPDATE payments SET payment_status_id = 5 WHERE reservations_id = p_reservation_id;
+    UPDATE payments SET payment_status_id = 6 WHERE reservations_id = p_reservation_id;
 
     COMMIT;
 END;
@@ -116,7 +116,7 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20003, 'Reservation is already paid or cancelled');
     END IF;
 
-    UPDATE payments SET payment_status_id = 1 WHERE reservations_id = p_reservation_id;
+    UPDATE payments SET payment_status_id = 2 WHERE reservations_id = p_reservation_id;
 
     COMMIT;
 END;

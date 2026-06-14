@@ -204,6 +204,7 @@ export default function MyTickets({ tickets = [], user, onRemoveStaleTickets }) 
       .then((res) => res.ok ? res.json() : {})
       .then((data) => {
         setReservationStatuses(data)
+        console.log("Fetched reservation statuses:", data)
         const existingIds = new Set(Object.keys(data).map(Number))
         const staleIds = ids.filter((id) => !existingIds.has(id))
         if (staleIds.length > 0) onRemoveStaleTickets?.(staleIds)
@@ -216,7 +217,7 @@ export default function MyTickets({ tickets = [], user, onRemoveStaleTickets }) 
     setPayError("")
     try {
       await payReservation(ticket.reservationId)
-      setReservationStatuses((prev) => ({ ...prev, [ticket.reservationId]: "PAID" }))
+      setReservationStatuses((prev) => ({ ...prev, [ticket.reservationId]: "Completed" }))
     } catch (err) {
       setPayError(err.message || "Payment failed")
     } finally {
@@ -229,7 +230,7 @@ export default function MyTickets({ tickets = [], user, onRemoveStaleTickets }) 
     setCancelError("")
     try {
       await cancelReservationRequest(ticket.reservationId)
-      setReservationStatuses((prev) => ({ ...prev, [ticket.reservationId]: "CANCELLED" }))
+      setReservationStatuses((prev) => ({ ...prev, [ticket.reservationId]: "Cancelled" }))
     } catch (err) {
       setCancelError(err.message || "Cancellation failed")
     } finally {
@@ -249,8 +250,8 @@ export default function MyTickets({ tickets = [], user, onRemoveStaleTickets }) 
 
       {tickets.map((ticket) => {
         const status = reservationStatuses[ticket.reservationId]
-        const isPaid = status === "PAID"
-        const isCancelled = status === "CANCELLED"
+        const isPaid = status === "Completed"
+        const isCancelled = status === "Cancelled" || status === "Failed" || status === "Refunded" || status === "Partially Refunded"
         const canCancel = !isPaid && !isCancelled && isMoreThan24hBefore(ticket.departureDatetime)
 
         return (
