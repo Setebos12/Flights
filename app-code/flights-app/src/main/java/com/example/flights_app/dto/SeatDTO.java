@@ -8,8 +8,11 @@ import lombok.Data;
 public class SeatDTO {
     private Integer row;
     private Integer col;
-    private String label;
-    private String status;
     private String seatType;
     private String className;
+    private String status;
+
+    public String getLabel() {
+        return row + String.valueOf((char) ('A' + col - 1));
+    }
 }

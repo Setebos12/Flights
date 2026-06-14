@@ -53,28 +53,23 @@ public class AuthController {
             return ResponseEntity.status(409).body("Email already in use");
         }
 
-        Long userId = userRepository.getNextId();
-        Long passengerId = passengerRepository.getNextId();
-
         User user = new User();
-        user.setId(userId);
         user.setEmailAddress(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setIsAdmin(0);
         userRepository.save(user);
 
         Passenger passenger = new Passenger();
-        passenger.setId(passengerId);
         passenger.setFirstName(request.getFirstName());
         passenger.setLastName(request.getLastName());
         passenger.setPhoneNumber(request.getPhoneNumber());
-        passenger.setUserId(userId);
+        passenger.setUserId(user.getId());
         passengerRepository.save(passenger);
 
-        user.setPassengersId(passengerId);
+        user.setPassengersId(passenger.getId());
         userRepository.save(user);
 
         String token = jwtService.generateToken(request.getEmail());
-        return ResponseEntity.ok(new AuthResponse(token, user.getEmailAddress(), userId, false));
+        return ResponseEntity.ok(new AuthResponse(token, user.getEmailAddress(), user.getId(), false));
     }
 }

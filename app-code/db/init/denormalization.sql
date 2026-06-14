@@ -39,6 +39,7 @@ END;
 CREATE OR REPLACE TRIGGER payment_calculation
 BEFORE INSERT OR UPDATE ON payments
 FOR EACH ROW
+WHEN (new.payment_amount IS NULL)
 DECLARE
     v_flight_price flights.price%TYPE;
     v_extra_sum NUMBER(9,2);
@@ -60,8 +61,9 @@ END;
 -- pre-joiny kluczy obcych
 
 CREATE OR REPLACE TRIGGER prejoin_payments
-BEFORE INSERT OR UPDATE OF currency_code ON payments
+BEFORE INSERT OR UPDATE ON payments
 FOR EACH ROW
+WHEN (new.currency_code IS NULL)
 BEGIN
     SELECT f.CURRENCY_CODE INTO :new.CURRENCY_CODE
     FROM FLIGHTS f

@@ -2,12 +2,17 @@ CREATE OR REPLACE PROCEDURE create_reservation (
     p_user_id IN NUMBER,
     p_flight_id IN NUMBER,
     p_passenger_count IN NUMBER,
+    p_calculated_price IN NUMBER,
+    p_currency_code IN VARCHAR2,
     p_new_reservation_id OUT NUMBER
 ) AS
 BEGIN
     INSERT INTO reservations (reservation_date, number_in_party, user_id, flights_id)
     VALUES (SYSDATE, p_passenger_count, p_user_id, p_flight_id)
     RETURNING id INTO p_new_reservation_id;
+
+    INSERT INTO payments (payment_date, payment_status_id, payment_amount, currency_code, reservations_id)
+    VALUES (SYSDATE, 1, p_calculated_price, p_currency_code, p_new_reservation_id);
 END;
 /
 
@@ -69,7 +74,7 @@ BEGIN
     SELECT payment_status_id INTO v_payment_status FROM payments
     WHERE reservations_id = p_reservation_id;
 
-    IF v_payment_status != 0 THEN
+    IF v_payment_status != 1 THEN
         RAISE_APPLICATION_ERROR(-20003, 'Reservation is already paid or cancelled');
     END IF;
 
@@ -107,7 +112,7 @@ BEGIN
     SELECT payment_status_id INTO v_payment_status FROM payments
     WHERE reservations_id = p_reservation_id;
 
-    IF v_payment_status != 0 THEN
+    IF v_payment_status != 1 THEN
         RAISE_APPLICATION_ERROR(-20003, 'Reservation is already paid or cancelled');
     END IF;
 

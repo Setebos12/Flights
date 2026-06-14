@@ -1,5 +1,6 @@
 package com.example.flights_app.repository;
 
+import com.example.flights_app.dto.SeatDTO;
 import com.example.flights_app.model.Flight;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,5 +29,18 @@ public interface FlightRepository extends JpaRepository<Flight, Long> {
             @Param("date") LocalDate date,
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice
+    );
+/*
+    private Integer row;
+    private Integer col;
+    private String label;
+    private String status;
+    private String seatType;
+    private String className; */
+    @Query(value = "SELECT row_nr as rowNr, column_nr as colNr, type_name as seatType, class_name as className, status " +
+               "FROM v_flight_seats WHERE flights_id = :flightId ORDER BY row_nr, column_nr",
+       nativeQuery = true)
+    List<SeatDTO> findSeatsByFlightId(
+        @Param("flightId") Long flightId
     );
 }
