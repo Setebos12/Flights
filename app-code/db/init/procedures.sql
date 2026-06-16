@@ -121,3 +121,61 @@ BEGIN
     COMMIT;
 END;
 /
+
+-- ── Procedury analityczne ────────────────────────────────────────────────────
+
+-- Obłożenie lotów z opcjonalnymi filtrami (airline, route, year, month)
+-- Zastępuje dynamiczne budowanie SQL w Javie — bezpieczniejsze i stabilniejszy plan
+CREATE OR REPLACE PROCEDURE get_occupancy (
+    p_airline_id IN NUMBER   DEFAULT NULL,
+    p_route_id   IN NUMBER   DEFAULT NULL,
+    p_year       IN NUMBER   DEFAULT NULL,
+    p_month      IN NUMBER   DEFAULT NULL,
+    p_result     OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_result FOR
+        SELECT flight_id, departure_date_time, arrival_date_time,
+               origin_code, origin_name, dest_code, dest_name,
+               airline_id, airline_name, plane_model,
+               booked_seats, total_seats, occupancy_pct,
+               dep_year, dep_month, price, currency_code
+        FROM v_flight_occupancy
+        WHERE (p_airline_id IS NULL OR airline_id = p_airline_id)
+          AND (p_route_id IS NULL   OR flight_id IN (
+                  SELECT id FROM flights WHERE routes_id = p_route_id))
+          AND (p_year IS NULL       OR dep_year = p_year)
+          AND (p_month IS NULL      OR dep_month = p_month)
+        ORDER BY departure_date_time ASC;
+END;
+/
+
+-- Sezonowość tras z opcjonalnymi filtrami (year, origin_code, dest_code)
+CREATE OR REPLACE PROCEDURE get_route_seasonality (
+    p_year        IN NUMBER   DEFAULT NULL,
+    p_origin_code IN VARCHAR2 DEFAULT NULL,
+    p_dest_code   IN VARCHAR2 DEFAULT NULL,
+    p_result      OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_result FOR
+        SELECT rs.routes_id AS route_id,
+               oa.airport_code AS origin_code, oc.name AS origin_city,
+               da.airport_code AS dest_code,   dc.name AS dest_city,
+               rs.year  AS dep_year,
+               rs.month AS dep_month,
+               rs.total_passengers,
+               rs.total_revenue
+        FROM route_statistics rs
+        JOIN routes r    ON r.id  = rs.routes_id
+        JOIN airports oa ON oa.id = r.origin_airport_id
+        JOIN city oc     ON oc.id = oa.city_id
+        JOIN airports da ON da.id = r.destination_airport_id
+        JOIN city dc     ON dc.id = da.city_id
+        WHERE rs.month > 0 AND rs.year > 0
+          AND (p_year IS NULL        OR rs.year = p_year)
+          AND (p_origin_code IS NULL OR oa.airport_code = UPPER(p_origin_code))
+          AND (p_dest_code IS NULL   OR da.airport_code = UPPER(p_dest_code))
+        ORDER BY rs.year ASC, rs.month ASC, rs.total_passengers DESC NULLS LAST;
+END;
+/

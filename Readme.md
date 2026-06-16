@@ -70,7 +70,22 @@ Znajdują się w pliku: [optimization.sql](./app-code/db/init/optimization.sql)
     - wykorzystywany w funkcji `findFlights` w [FlightRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/FlightRepository.java)
 
 2. Widoki części analitycznej
-// TO DO
+Znajdują się w pliku: [04_analytics_views.sql](./app-code/db/init/04_analytics_views.sql)
+* Widok `v_flight_occupancy`
+    - oblicza obłożenie każdego lotu (booked_seats / total_seats) jako `occupancy_pct`
+    - łączy flights z routes, airports, airlines, planes
+    - wykorzystywany przez `findOccupancy` i `findOccupancySummary` w [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java)
+* Widok `v_route_seasonality`
+    - agreguje liczbę lotów i pasażerów per trasa per miesiąc
+    - backup dla danych z tabeli agregującej `route_statistics`
+* Widok `v_route_revenue`
+    - przychody per trasa per miesiąc na podstawie opłaconych płatności (`payment_status_id = 2`)
+* Widok `v_airline_ranking`
+    - ranking linii lotniczych po przychodach, obłożeniu i liczbie lotów
+    - wykorzystywany przez `findAirlineRanking` i `findKpiSummary` w [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java)
+* Widok `v_price_distribution`
+    - rozkład cen (min, max, avg, mediana) per trasa
+    - wykorzystywany przez `findPriceDistribution` w [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java)
 
 #### Dodane indeksy
 Znajdują się w pliku: [optimization.sql](./app-code/db/init/optimization.sql)
@@ -84,6 +99,11 @@ Znajdują się w pliku: [optimization.sql](./app-code/db/init/optimization.sql)
     - Podczas wyszukiwania lotów w aplikacji filtrować można po: dacie odlotu, cenie (zakresowo), lotniskach przylotu i odlotu, dlatego utworzone są indeksy na kombinacjach tych wartości, przy czym:
         - flight_date_price_idx obejmuje zarówno filtrowanie po kombinacji daty i ceny oraz samej daty
         - Podobnie routes_origin_dest_idx i routes_dest_idx obejmuje filtrowanie po kombinacji lotnisk, jak i samego lotniska wylotu
+* Na podstawie analizy zapytań części analitycznej:
+    - `flights_dep_year_idx` / `flights_dep_month_idx` — function-based indeksy na `EXTRACT(YEAR/MONTH FROM CAST(departure_date_time AS DATE))`, ponieważ widok `v_flight_occupancy` filtruje po wyliczanych kolumnach `dep_year` / `dep_month`
+    - `rs_year_month_idx` na `route_statistics(year, month)` — PK tabeli to `(routes_id, year, month)`, więc zapytania filtrujące tylko po `year`/`month` (bez `routes_id`) nie mogą optymalnie użyć PK
+    - `rs_alltime_passengers_idx` na `route_statistics(year, month, total_passengers DESC)` — covering index dla zapytania top routes (`WHERE year=0 AND month=0 ORDER BY total_passengers DESC`)
+    - `payments_status_idx` na `payments(payment_status_id)` — widoki `v_airline_ranking` i `v_route_revenue` filtrują `payment_status_id = 2`
 
 #### Dodane procedury składowane
 Znajdują się w pliku: [procedures.sql](./app-code/db/init/procedures.sql)
@@ -102,6 +122,14 @@ Znajdują się w pliku: [procedures.sql](./app-code/db/init/procedures.sql)
 * `pay_for_reservation`
     - Realizacja płatności jako ustawienie status płatności na “Completed”
     - Wykorzystanie w: [ReservationService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/ReservationService.java)
+* `get_occupancy` (analityczna)
+    - Zwraca obłożenie lotów z opcjonalnymi filtrami: linia lotnicza, trasa, rok, miesiąc
+    - Zastępuje dynamiczne budowanie SQL w Javie (konkatenacja stringów) — eliminuje ryzyko SQL injection i pozwala na stabilniejszy plan wykonania
+    - Wykorzystanie w: [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java)
+* `get_route_seasonality` (analityczna)
+    - Zwraca sezonowość tras (pasażerowie i przychody per miesiąc) z opcjonalnymi filtrami: rok, lotnisko origin, lotnisko destination
+    - Hermetyzuje logikę złączeń (route_statistics + routes + airports + city) i filtrowania
+    - Wykorzystanie w: [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java)
 
 #### Dodane wyzwalacze
 Znajdują się w pliku: [denormalization.sql](./app-code/db/init/denormalization.sql) <br>

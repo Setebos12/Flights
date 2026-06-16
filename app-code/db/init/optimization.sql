@@ -66,3 +66,26 @@ FROM flights f
 JOIN seats s ON f.serial_number = s.serial_number
 LEFT JOIN seat_type st ON s.seat_type_id = st.id
 LEFT JOIN class c ON s.class_id = c.id;
+
+-- ── Indeksy analityczne ──────────────────────────────────────────────────────
+
+-- Filtrowanie po roku/miesiącu odlotu w v_flight_occupancy
+-- Wyrażenie odpowiada definicji kolumn dep_year / dep_month w widoku
+CREATE INDEX flights_dep_year_idx ON flights (
+    EXTRACT(YEAR FROM CAST(departure_date_time AS DATE))
+);
+CREATE INDEX flights_dep_month_idx ON flights (
+    EXTRACT(MONTH FROM CAST(departure_date_time AS DATE))
+);
+
+-- Zapytania do route_statistics filtrują po (year, month) bez routes_id,
+-- PK = (routes_id, year, month) nie jest wtedy optymalnie wykorzystywany
+CREATE INDEX rs_year_month_idx ON route_statistics (year, month);
+
+-- Top routes: filtr year=0, month=0 + ORDER BY total_passengers DESC
+CREATE INDEX rs_alltime_passengers_idx ON route_statistics (
+    year, month, total_passengers DESC
+);
+
+-- v_airline_ranking / v_route_revenue filtrują payment_status_id = 2
+CREATE INDEX payments_status_idx ON payments (payment_status_id);
