@@ -13,12 +13,8 @@ public class RouteRevenueDTO {
     private String originCity;
     private String destCode;
     private String destCity;
-    private Long airlineId;
-    private String airlineName;
     private Integer payYear;
     private Integer payMonth;
-    private Long totalPayments;
+    private Long totalPassengers;
     private BigDecimal totalRevenue;
-    private BigDecimal avgPayment;
-    private String currencyCode;
 }

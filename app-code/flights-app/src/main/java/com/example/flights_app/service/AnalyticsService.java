@@ -85,11 +85,8 @@ public class AnalyticsService {
                         toStr(r.get("DEST_CITY")),
                         toInt(r.get("DEP_YEAR")),
                         toInt(r.get("DEP_MONTH")),
-                        toLong(r.get("TOTAL_FLIGHTS")),
                         toLong(r.get("TOTAL_PASSENGERS")),
-                        toBD(r.get("AVG_OCCUPANCY_PCT")),
-                        toBD(r.get("AVG_PRICE")),
-                        toStr(r.get("CURRENCY_CODE"))
+                        toBD(r.get("TOTAL_REVENUE"))
                 ))
                 .toList();
     }
@@ -98,10 +95,10 @@ public class AnalyticsService {
         return analyticsRepository.findTopRoutes(limit);
     }
 
-    // ── Revenue ────────────────────────────────────────────────────────────────
+    // ── Revenue (route_statistics) ──────────────────────────────────────────────
 
-    public List<RouteRevenueDTO> getRouteRevenue(Integer year, Long airlineId) {
-        return analyticsRepository.findRouteRevenue(year, airlineId)
+    public List<RouteRevenueDTO> getRouteRevenue(Integer year) {
+        return analyticsRepository.findRouteRevenue(year)
                 .stream()
                 .map(r -> new RouteRevenueDTO(
                         toLong(r.get("ROUTE_ID")),
@@ -109,14 +106,10 @@ public class AnalyticsService {
                         toStr(r.get("ORIGIN_CITY")),
                         toStr(r.get("DEST_CODE")),
                         toStr(r.get("DEST_CITY")),
-                        toLong(r.get("AIRLINE_ID")),
-                        toStr(r.get("AIRLINE_NAME")),
                         toInt(r.get("PAY_YEAR")),
                         toInt(r.get("PAY_MONTH")),
-                        toLong(r.get("TOTAL_PAYMENTS")),
-                        toBD(r.get("TOTAL_REVENUE")),
-                        toBD(r.get("AVG_PAYMENT")),
-                        toStr(r.get("CURRENCY_CODE"))
+                        toLong(r.get("TOTAL_PASSENGERS")),
+                        toBD(r.get("TOTAL_REVENUE"))
                 ))
                 .toList();
     }
