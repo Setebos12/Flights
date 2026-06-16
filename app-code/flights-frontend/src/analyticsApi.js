@@ -40,10 +40,9 @@ export async function fetchTopRoutes(limit = 10) {
   return get(`${BASE}/routes/top?limit=${limit}`)
 }
 
-export async function fetchRouteRevenue({ year, airlineId } = {}) {
+export async function fetchRouteRevenue({ year } = {}) {
   const q = new URLSearchParams()
   if (year)      q.append("year", year)
-  if (airlineId) q.append("airlineId", airlineId)
   return get(`${BASE}/routes/revenue?${q}`)
 }
 
