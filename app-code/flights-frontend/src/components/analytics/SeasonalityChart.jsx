@@ -35,9 +35,9 @@ function buildMonthlyData(rows, selectedRoute) {
   const byMonth = {}
   for (const r of filtered) {
     const key = MONTH_NAMES[r.depMonth] ?? r.depMonth
-    if (!byMonth[key]) byMonth[key] = { month: key, passengers: 0, flights: 0 }
+    if (!byMonth[key]) byMonth[key] = { month: key, passengers: 0, revenue: 0 }
     byMonth[key].passengers += Number(r.totalPassengers ?? 0)
-    byMonth[key].flights    += Number(r.totalFlights ?? 0)
+    byMonth[key].revenue    += Number(r.totalRevenue ?? 0)
   }
   return Object.values(byMonth).sort((a, b) =>
     MONTH_NAMES.indexOf(a.month) - MONTH_NAMES.indexOf(b.month)
@@ -49,7 +49,7 @@ export default function SeasonalityChart() {
   const [chartData, setChartData] = useState([])
   const [routes, setRoutes] = useState([])
   const [selectedRoute, setSelectedRoute] = useState("")
-  const [metric, setMetric] = useState("passengers") // "passengers" | "flights"
+  const [metric, setMetric] = useState("passengers") // "passengers" | "revenue"
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -90,8 +90,8 @@ export default function SeasonalityChart() {
           <div className="analytics-toggle">
             <button className={metric === "passengers" ? "active" : ""}
               onClick={() => setMetric("passengers")}>Passengers</button>
-            <button className={metric === "flights" ? "active" : ""}
-              onClick={() => setMetric("flights")}>Flights</button>
+            <button className={metric === "revenue" ? "active" : ""}
+              onClick={() => setMetric("revenue")}>Revenue</button>
           </div>
         </div>
       </div>
@@ -105,8 +105,8 @@ export default function SeasonalityChart() {
           <Legend wrapperStyle={{ color: "#94a3b8", fontSize: 12, paddingTop: 8 }} />
           <Bar
             dataKey={metric}
-            name={metric === "passengers" ? "Passengers" : "Flights"}
-            fill="hsl(220,80%,60%)"
+            name={metric === "passengers" ? "Passengers" : "Revenue"}
+            fill={metric === "passengers" ? "hsl(220,80%,60%)" : "hsl(45,85%,55%)"}
             radius={[6, 6, 0, 0]}
           />
         </BarChart>
@@ -116,8 +116,7 @@ export default function SeasonalityChart() {
         <table className="analytics-table">
           <thead>
             <tr>
-              <th>Route</th><th>Month</th><th>Flights</th><th>Passengers</th>
-              <th>Avg Fill %</th><th>Avg Price</th>
+              <th>Route</th><th>Month</th><th>Passengers</th><th>Revenue</th>
             </tr>
           </thead>
           <tbody>
@@ -128,10 +127,8 @@ export default function SeasonalityChart() {
               <tr key={i}>
                 <td><strong>{r.originCode} → {r.destCode}</strong></td>
                 <td>{MONTH_NAMES[r.depMonth]} {r.depYear}</td>
-                <td>{r.totalFlights}</td>
                 <td>{r.totalPassengers?.toLocaleString()}</td>
-                <td>{r.avgOccupancyPct != null ? `${Number(r.avgOccupancyPct).toFixed(1)}%` : "—"}</td>
-                <td>{r.avgPrice != null ? `${Number(r.avgPrice).toFixed(2)} ${r.currencyCode}` : "—"}</td>
+                <td>{r.totalRevenue != null ? Number(r.totalRevenue).toLocaleString("pl-PL", { minimumFractionDigits: 2 }) : "—"}</td>
               </tr>
             ))}
           </tbody>

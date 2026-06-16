@@ -76,15 +76,14 @@ public class AnalyticsController {
     }
 
     /**
-     * GET /api/analytics/routes/revenue?year=&airlineId=
-     * Revenue per route from completed payments.
+     * GET /api/analytics/routes/revenue?year=
+     * Revenue per route from route_statistics.
      */
     @GetMapping("/routes/revenue")
     public List<RouteRevenueDTO> getRouteRevenue(
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Long airlineId
+            @RequestParam(required = false) Integer year
     ) {
-        return analyticsService.getRouteRevenue(year, airlineId);
+        return analyticsService.getRouteRevenue(year);
     }
 
     /**

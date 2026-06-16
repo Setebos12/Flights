@@ -15,9 +15,6 @@ public class RoutePopularityDTO {
     private String destCity;
     private Integer depYear;
     private Integer depMonth;
-    private Long totalFlights;
     private Long totalPassengers;
-    private BigDecimal avgOccupancyPct;
-    private BigDecimal avgPrice;
-    private String currencyCode;
+    private BigDecimal totalRevenue;
 }

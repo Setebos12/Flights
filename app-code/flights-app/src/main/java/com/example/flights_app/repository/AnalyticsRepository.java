@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Native queries against analytics views (v_flight_occupancy, v_route_seasonality,
- * v_route_revenue, v_airline_ranking, v_price_distribution).
- * Uses JdbcTemplate for flexibility with Oracle SQL and dynamic filtering.
+ * Native queries against analytics data.
+ * Seasonality, top-routes, revenue and KPI now read from the
+ * aggregate table route_statistics instead of heavy views.
+ * Occupancy, airline ranking and price distribution still use their views.
  */
 @Repository
 public class AnalyticsRepository {
@@ -60,80 +61,107 @@ public class AnalyticsRepository {
             """);
     }
 
-    // ── Seasonality / Popularity ───────────────────────────────────────────────
+    // ── Seasonality / Popularity (route_statistics) ───────────────────────────
 
     /**
-     * Route popularity with seasonality, optionally filtered by year.
+     * Route popularity with seasonality from route_statistics table.
+     * Reads monthly rows (year > 0 AND month > 0).
      */
     public List<Map<String, Object>> findRouteSeasonality(Integer year, String originCode,
                                                           String destCode) {
         StringBuilder sql = new StringBuilder("""
-            SELECT route_id, origin_code, origin_city, dest_code, dest_city,
-                   dep_year, dep_month, total_flights, total_passengers,
-                   avg_occupancy_pct, avg_price, currency_code
-            FROM v_route_seasonality
-            WHERE 1=1
+            SELECT rs.routes_id AS route_id,
+                   oa.airport_code AS origin_code, oc.name AS origin_city,
+                   da.airport_code AS dest_code,   dc.name AS dest_city,
+                   rs.year  AS dep_year,
+                   rs.month AS dep_month,
+                   rs.total_passengers,
+                   rs.total_revenue
+            FROM route_statistics rs
+            JOIN routes r    ON r.id  = rs.routes_id
+            JOIN airports oa ON oa.id = r.origin_airport_id
+            JOIN city oc     ON oc.id = oa.city_id
+            JOIN airports da ON da.id = r.destination_airport_id
+            JOIN city dc     ON dc.id = da.city_id
+            WHERE rs.month > 0 AND rs.year > 0
             """);
-        if (year       != null) sql.append(" AND dep_year = ").append(year);
+        if (year       != null) sql.append(" AND rs.year = ").append(year);
         if (originCode != null && !originCode.isBlank())
-            sql.append(" AND origin_code = '").append(originCode.toUpperCase()).append("'");
+            sql.append(" AND oa.airport_code = '").append(originCode.toUpperCase()).append("'");
         if (destCode   != null && !destCode.isBlank())
-            sql.append(" AND dest_code = '").append(destCode.toUpperCase()).append("'");
-        sql.append(" ORDER BY dep_year ASC, dep_month ASC, total_passengers DESC");
+            sql.append(" AND da.airport_code = '").append(destCode.toUpperCase()).append("'");
+        sql.append(" ORDER BY rs.year ASC, rs.month ASC, rs.total_passengers DESC NULLS LAST");
         return jdbc.queryForList(sql.toString());
     }
 
     /**
-     * Top routes by passenger count (all-time).
+     * Top routes by passenger count from route_statistics (all-time rows: year=0, month=0).
      */
     public List<Map<String, Object>> findTopRoutes(int limit) {
         String sql =
-            "SELECT origin_code, origin_city, dest_code, dest_city," +
-            "       SUM(total_flights)              AS total_flights," +
-            "       SUM(total_passengers)           AS total_passengers," +
-            "       ROUND(AVG(avg_occupancy_pct),2) AS avg_occupancy_pct" +
-            " FROM v_route_seasonality" +
-            " GROUP BY origin_code, origin_city, dest_code, dest_city" +
-            " ORDER BY total_passengers DESC NULLS LAST" +
+            "SELECT oa.airport_code AS origin_code, oc.name AS origin_city," +
+            "       da.airport_code AS dest_code, dc.name AS dest_city," +
+            "       rs.total_passengers, rs.total_revenue" +
+            " FROM route_statistics rs" +
+            " JOIN routes r    ON r.id  = rs.routes_id" +
+            " JOIN airports oa ON oa.id = r.origin_airport_id" +
+            " JOIN city oc     ON oc.id = oa.city_id" +
+            " JOIN airports da ON da.id = r.destination_airport_id" +
+            " JOIN city dc     ON dc.id = da.city_id" +
+            " WHERE rs.year = 0 AND rs.month = 0" +
+            " ORDER BY rs.total_passengers DESC NULLS LAST" +
             " FETCH FIRST " + limit + " ROWS ONLY";
         return jdbc.queryForList(sql);
     }
 
-    // ── Revenue ────────────────────────────────────────────────────────────────
+    // ── Revenue (route_statistics) ────────────────────────────────────────────
 
     /**
-     * Route revenue for completed payments, optionally filtered by year, airline.
+     * Revenue per route from route_statistics, optionally filtered by year.
      */
-    public List<Map<String, Object>> findRouteRevenue(Integer year, Long airlineId) {
+    public List<Map<String, Object>> findRouteRevenue(Integer year) {
         StringBuilder sql = new StringBuilder("""
-            SELECT route_id, origin_code, origin_city, dest_code, dest_city,
-                   airline_id, airline_name, pay_year, pay_month,
-                   total_payments, total_revenue, avg_payment, currency_code
-            FROM v_route_revenue
-            WHERE 1=1
+            SELECT rs.routes_id AS route_id,
+                   oa.airport_code AS origin_code, oc.name AS origin_city,
+                   da.airport_code AS dest_code,   dc.name AS dest_city,
+                   rs.year  AS pay_year,
+                   rs.month AS pay_month,
+                   rs.total_passengers,
+                   rs.total_revenue
+            FROM route_statistics rs
+            JOIN routes r    ON r.id  = rs.routes_id
+            JOIN airports oa ON oa.id = r.origin_airport_id
+            JOIN city oc     ON oc.id = oa.city_id
+            JOIN airports da ON da.id = r.destination_airport_id
+            JOIN city dc     ON dc.id = da.city_id
+            WHERE rs.month > 0 AND rs.year > 0
             """);
-        if (year      != null) sql.append(" AND pay_year = ").append(year);
-        if (airlineId != null) sql.append(" AND airline_id = ").append(airlineId);
-        sql.append(" ORDER BY pay_year ASC, pay_month ASC, total_revenue DESC NULLS LAST");
+        if (year != null) sql.append(" AND rs.year = ").append(year);
+        sql.append(" ORDER BY rs.year ASC, rs.month ASC, rs.total_revenue DESC NULLS LAST");
         return jdbc.queryForList(sql.toString());
     }
 
-    // ── KPI Summary ────────────────────────────────────────────────────────────
+    // ── KPI Summary (route_statistics) ────────────────────────────────────────
 
     public Map<String, Object> findKpiSummary() {
         return jdbc.queryForMap("""
             SELECT
                 (SELECT COUNT(*) FROM flights)                                  AS total_flights,
-                (SELECT NVL(SUM(booked_seats_count), 0) FROM flights)           AS total_passengers,
-                (SELECT NVL(SUM(payment_amount), 0) FROM payments
-                  WHERE payment_status_id = 2)                                  AS total_revenue,
+                (SELECT NVL(SUM(total_passengers), 0)
+                   FROM route_statistics
+                  WHERE year = 0 AND month = 0)                                 AS total_passengers,
+                (SELECT NVL(SUM(total_revenue), 0)
+                   FROM route_statistics
+                  WHERE year = 0 AND month = 0)                                 AS total_revenue,
                 (SELECT ROUND(AVG(occupancy_pct), 2) FROM v_flight_occupancy)   AS avg_occupancy_pct,
-                (SELECT origin_code || ' → ' || dest_code
-                   FROM (SELECT origin_code, dest_code, SUM(total_passengers) AS tp
-                           FROM v_route_seasonality
-                          GROUP BY origin_code, dest_code
-                          ORDER BY tp DESC NULLS LAST
-                          FETCH FIRST 1 ROWS ONLY))                             AS top_route,
+                (SELECT oa.airport_code || ' → ' || da.airport_code
+                   FROM route_statistics rs
+                   JOIN routes r    ON r.id  = rs.routes_id
+                   JOIN airports oa ON oa.id = r.origin_airport_id
+                   JOIN airports da ON da.id = r.destination_airport_id
+                  WHERE rs.year = 0 AND rs.month = 0
+                  ORDER BY rs.total_passengers DESC NULLS LAST
+                  FETCH FIRST 1 ROWS ONLY)                                      AS top_route,
                 (SELECT airline_name
                    FROM v_airline_ranking
                   ORDER BY total_revenue DESC NULLS LAST

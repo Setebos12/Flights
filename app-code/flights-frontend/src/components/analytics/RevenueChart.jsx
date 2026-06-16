@@ -25,11 +25,11 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 function downloadCSV(rows) {
-  const headers = ["Route","Airline","Month","Year","Payments","Revenue","Avg Payment","Currency"]
+  const headers = ["Route","Month","Year","Passengers","Revenue"]
   const lines = rows.map(r => [
-    `${r.originCode}→${r.destCode}`, r.airlineName,
+    `${r.originCode}→${r.destCode}`,
     MONTH_NAMES[r.payMonth] ?? r.payMonth, r.payYear,
-    r.totalPayments, r.totalRevenue, r.avgPayment, r.currencyCode
+    r.totalPassengers, r.totalRevenue
   ].join(","))
   const csv = [headers.join(","), ...lines].join("\n")
   const blob = new Blob([csv], { type: "text/csv" })
@@ -64,9 +64,9 @@ export default function RevenueChart() {
     const byMonth = {}
     for (const r of filtered) {
       const key = `${MONTH_NAMES[r.payMonth]} ${r.payYear}`
-      if (!byMonth[key]) byMonth[key] = { period: key, revenue: 0, payments: 0 }
-      byMonth[key].revenue  += Number(r.totalRevenue ?? 0)
-      byMonth[key].payments += Number(r.totalPayments ?? 0)
+      if (!byMonth[key]) byMonth[key] = { period: key, revenue: 0, passengers: 0 }
+      byMonth[key].revenue    += Number(r.totalRevenue ?? 0)
+      byMonth[key].passengers += Number(r.totalPassengers ?? 0)
     }
     setChartData(Object.values(byMonth))
   }
@@ -139,8 +139,8 @@ export default function RevenueChart() {
         <table className="analytics-table">
           <thead>
             <tr>
-              <th>Route</th><th>Airline</th><th>Month</th>
-              <th>Payments</th><th>Revenue</th><th>Avg</th><th>Currency</th>
+              <th>Route</th><th>Month</th>
+              <th>Passengers</th><th>Revenue</th>
             </tr>
           </thead>
           <tbody>
@@ -150,12 +150,9 @@ export default function RevenueChart() {
             ).slice(0, 20).map((r, i) => (
               <tr key={i}>
                 <td><strong>{r.originCode} → {r.destCode}</strong></td>
-                <td>{r.airlineName}</td>
                 <td>{MONTH_NAMES[r.payMonth]} {r.payYear}</td>
-                <td>{r.totalPayments}</td>
+                <td>{r.totalPassengers?.toLocaleString()}</td>
                 <td><strong>{Number(r.totalRevenue ?? 0).toLocaleString("pl-PL", { minimumFractionDigits: 2 })}</strong></td>
-                <td>{Number(r.avgPayment ?? 0).toFixed(2)}</td>
-                <td>{r.currencyCode}</td>
               </tr>
             ))}
           </tbody>
