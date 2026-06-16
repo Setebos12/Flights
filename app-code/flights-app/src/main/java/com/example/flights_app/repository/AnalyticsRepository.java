@@ -1,8 +1,18 @@
 package com.example.flights_app.repository;
 
+import oracle.jdbc.OracleTypes;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Types;
+
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,39 +20,75 @@ import java.util.Map;
  * Native queries against analytics data.
  * Seasonality, top-routes, revenue and KPI now read from the
  * aggregate table route_statistics instead of heavy views.
- * Occupancy, airline ranking and price distribution still use their views.
+ * Occupancy and seasonality use stored procedures (get_occupancy, get_route_seasonality).
+ * Other queries use native SQL against views.
  */
 @Repository
 public class AnalyticsRepository {
 
     private final JdbcTemplate jdbc;
+    private final SimpleJdbcCall occupancyCall;
+    private final SimpleJdbcCall seasonalityCall;
 
-    public AnalyticsRepository(JdbcTemplate jdbc) {
+    public AnalyticsRepository(JdbcTemplate jdbc, DataSource dataSource) {
         this.jdbc = jdbc;
+
+        this.occupancyCall = new SimpleJdbcCall(dataSource)
+                .withProcedureName("get_occupancy")
+                .withoutProcedureColumnMetaDataAccess()
+                .declareParameters(
+                        new SqlParameter("p_airline_id", Types.NUMERIC),
+                        new SqlParameter("p_route_id", Types.NUMERIC),
+                        new SqlParameter("p_year", Types.NUMERIC),
+                        new SqlParameter("p_month", Types.NUMERIC),
+                        new SqlOutParameter("p_result", OracleTypes.CURSOR,
+                                (ResultSet rs, int rowNum) -> rsRowToMap(rs))
+                );
+
+        this.seasonalityCall = new SimpleJdbcCall(dataSource)
+                .withProcedureName("get_route_seasonality")
+                .withoutProcedureColumnMetaDataAccess()
+                .declareParameters(
+                        new SqlParameter("p_year", Types.NUMERIC),
+                        new SqlParameter("p_origin_code", Types.VARCHAR),
+                        new SqlParameter("p_dest_code", Types.VARCHAR),
+                        new SqlOutParameter("p_result", OracleTypes.CURSOR,
+                                (ResultSet rs, int rowNum) -> rsRowToMap(rs))
+                );
+    }
+
+    /** Converts a single ResultSet row into a Map with uppercase column names. */
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> rsRowToMap(ResultSet rs) {
+        try {
+            ResultSetMetaData meta = rs.getMetaData();
+            Map<String, Object> row = new LinkedHashMap<>();
+            for (int i = 1; i <= meta.getColumnCount(); i++) {
+                row.put(meta.getColumnLabel(i).toUpperCase(), rs.getObject(i));
+            }
+            return row;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // ── Occupancy ──────────────────────────────────────────────────────────────
 
     /**
-     * Returns per-flight occupancy, optionally filtered by airline, route, year, month.
+     * Returns per-flight occupancy via stored procedure get_occupancy.
+     * Optionally filtered by airline, route, year, month.
      */
+    @SuppressWarnings("unchecked")
     public List<Map<String, Object>> findOccupancy(Long airlineId, Long routeId,
                                                     Integer year, Integer month) {
-        StringBuilder sql = new StringBuilder("""
-            SELECT flight_id, departure_date_time, arrival_date_time,
-                   origin_code, origin_name, dest_code, dest_name,
-                   airline_id, airline_name, plane_model,
-                   booked_seats, total_seats, occupancy_pct,
-                   dep_year, dep_month, price, currency_code
-            FROM v_flight_occupancy
-            WHERE 1=1
-            """);
-        if (airlineId != null) sql.append(" AND airline_id = ").append(airlineId);
-        if (routeId   != null) sql.append(" AND flight_id IN (SELECT id FROM flights WHERE routes_id = ").append(routeId).append(")");
-        if (year      != null) sql.append(" AND dep_year = ").append(year);
-        if (month     != null) sql.append(" AND dep_month = ").append(month);
-        sql.append(" ORDER BY departure_date_time ASC");
-        return jdbc.queryForList(sql.toString());
+        Map<String, Object> mutableParams = new java.util.HashMap<>();
+        mutableParams.put("p_airline_id", airlineId);
+        mutableParams.put("p_route_id", routeId);
+        mutableParams.put("p_year", year);
+        mutableParams.put("p_month", month);
+
+        Map<String, Object> result = occupancyCall.execute(mutableParams);
+        return (List<Map<String, Object>>) result.get("p_result");
     }
 
     /**
@@ -64,34 +110,21 @@ public class AnalyticsRepository {
     // ── Seasonality / Popularity (route_statistics) ───────────────────────────
 
     /**
-     * Route popularity with seasonality from route_statistics table.
-     * Reads monthly rows (year > 0 AND month > 0).
+     * Route popularity with seasonality via stored procedure get_route_seasonality.
+     * Reads monthly rows, optionally filtered by year, origin and destination codes.
      */
+    @SuppressWarnings("unchecked")
     public List<Map<String, Object>> findRouteSeasonality(Integer year, String originCode,
                                                           String destCode) {
-        StringBuilder sql = new StringBuilder("""
-            SELECT rs.routes_id AS route_id,
-                   oa.airport_code AS origin_code, oc.name AS origin_city,
-                   da.airport_code AS dest_code,   dc.name AS dest_city,
-                   rs.year  AS dep_year,
-                   rs.month AS dep_month,
-                   rs.total_passengers,
-                   rs.total_revenue
-            FROM route_statistics rs
-            JOIN routes r    ON r.id  = rs.routes_id
-            JOIN airports oa ON oa.id = r.origin_airport_id
-            JOIN city oc     ON oc.id = oa.city_id
-            JOIN airports da ON da.id = r.destination_airport_id
-            JOIN city dc     ON dc.id = da.city_id
-            WHERE rs.month > 0 AND rs.year > 0
-            """);
-        if (year       != null) sql.append(" AND rs.year = ").append(year);
-        if (originCode != null && !originCode.isBlank())
-            sql.append(" AND oa.airport_code = '").append(originCode.toUpperCase()).append("'");
-        if (destCode   != null && !destCode.isBlank())
-            sql.append(" AND da.airport_code = '").append(destCode.toUpperCase()).append("'");
-        sql.append(" ORDER BY rs.year ASC, rs.month ASC, rs.total_passengers DESC NULLS LAST");
-        return jdbc.queryForList(sql.toString());
+        Map<String, Object> mutableParams = new java.util.HashMap<>();
+        mutableParams.put("p_year", year);
+        mutableParams.put("p_origin_code", originCode != null && !originCode.isBlank()
+                ? originCode.toUpperCase() : null);
+        mutableParams.put("p_dest_code", destCode != null && !destCode.isBlank()
+                ? destCode.toUpperCase() : null);
+
+        Map<String, Object> result = seasonalityCall.execute(mutableParams);
+        return (List<Map<String, Object>>) result.get("p_result");
     }
 
     /**
