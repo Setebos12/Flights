@@ -154,18 +154,14 @@ class AnalyticsServiceTest {
         row.put("ORIGIN_CITY", null);
         row.put("DEST_CODE", null);
         row.put("DEST_CITY", null);
-        row.put("AIRLINE_ID", null);
-        row.put("AIRLINE_NAME", null);
         row.put("PAY_YEAR", null);
         row.put("PAY_MONTH", null);
-        row.put("TOTAL_PAYMENTS", null);
+        row.put("TOTAL_PASSENGERS", null);
         row.put("TOTAL_REVENUE", null);
-        row.put("AVG_PAYMENT", null);
-        row.put("CURRENCY_CODE", null);
 
-        when(analyticsRepository.findRouteRevenue(null, null)).thenReturn(List.of(row));
+        when(analyticsRepository.findRouteRevenue(null)).thenReturn(List.of(row));
 
-        List<com.example.flights_app.dto.RouteRevenueDTO> result = analyticsService.getRouteRevenue(null, null);
+        List<com.example.flights_app.dto.RouteRevenueDTO> result = analyticsService.getRouteRevenue(null);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getOriginCode()).isNull();

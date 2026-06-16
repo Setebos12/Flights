@@ -108,7 +108,7 @@ class AnalyticsControllerTest {
 
         @Test
         void getRouteRevenue_returnsEmptyWhenNoData() throws Exception {
-                when(analyticsService.getRouteRevenue(2026, null)).thenReturn(List.of());
+                when(analyticsService.getRouteRevenue(2026)).thenReturn(List.of());
 
                 mockMvc.perform(get("/api/analytics/routes/revenue")
                                                 .param("year", "2026")
