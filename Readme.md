@@ -1,4 +1,13 @@
 # Project topic: Airline Handling System
+
+## Media & Showcase
+### Technology Stack & Architecture Showcase
+* 🎥 [Technology Overview (Minions Edition)](https://www.youtube.com/watch?v=d7ykmqRy26A) – A fun yet detailed presentation introducing the project's tech stack, database constraints, and underlying architecture.
+
+### Sample Run
+* 🚀 [Application Demo](https://www.youtube.com/watch?v=H3jNq9FGktk)
+
+
 ## Database Models
 ### Conceptual Model
 Entity description:
@@ -314,7 +323,13 @@ React components are located in the directory `app-code/flights-frontend/src/com
 
 Communication with the backend takes place through [analyticsApi.js](./app-code/flights-frontend/src/analyticsApi.js), which uses the REST endpoints described above.
 
+
+
+
 ### USERS:
 To test the application's operation, log in using the following users:
 1. ADMIN - email: anna.nowak@email.pl - password: Haslo5678
 2. USER - email: piotr.wisniewski@email.pl - password: Secure99!
+
+### System Trailer
+* 🎬 [System Trailer](https://www.youtube.com/watch?v=eDwicYUp85Y)
