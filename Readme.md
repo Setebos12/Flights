@@ -1,320 +1,320 @@
-# Temat projektu: System obsługi linii lotniczych
-## Modele bazy danych
-### Model pojęciowy
-Opis encji:
-- Time Zone - słownik dostępnych stref czasowych wraz z kodem i przesunięciem UTC
-- Country - reprezentacja krajów, każdy kraj przypisany do strefy czasowej
-- City - reprezentacja miast, każde miasto przypisane do kraju
-- Airports - reprezentacja lotnisk wraz z ich kodami, każde lotnisko przypisane do miasta
-- Routes - katalog obsługiwanych tras, zdefiniowane połączenie między dwoma lotniskami
-- Flights - katalog dostępnych lotów, połączenie trasy i samolotu, wraz z czasami odlotu i przylotu oraz ceną
-- Airlines - katalog linii lotniczych obsługujących system
-- Planes - reprezentacja fizycznych samolotów, parametry typu: liczba miejsc, ładowność, pojemność paliwa
-- Seat type - słownik przechowujący typy dostępnych miejsc (okno, środek, korytarz)
-- Class - słownik przechowujący możliwe klasy (economy, business itp.)
-- Seats - reprezentacja każdego miejsca w każdym samolocie, reprezentowane przez własne id oraz numer seryjny samolotu, określony numer rzędu i kolumny
-- Currency - słownik przechowujący możliwe waluty
-- Reservations - centralny punkt procesó zakupowych, powiązanie użytkownika z konkretnym lotem, oraz ilością wykupionych miejsc, w danym punkcie czasowym
-- Extra services - katalog dostępnych dodatkowych usług wraz z ich ceną, np. priorytetowe wejście
-- Luggage - poddtyp Extra services, uszczegółowione wszystkie usługi walizkowe o dokładne parametry bagażu
-- Users - reprezentacja użytkowników w systemie, przechowuje dane dostępowe użytkownika do konta (email, hasło)
-- Passengers - reprezentacja każdego pasażera lotu, przechowuje dane osobowe podróżnych, m.in. imię, nazwisko, numer telefonu
-- Payment Status - słownik możliwych statusów płatności, np. "oczekiwana", "zrealizowana" itp.
-- Payment - reprezentacja transakcji płatniczych, powiązanie płatności z rezerwacja w danym punkcie czasowym, każda posiada status
-- Reservations extra services - przypisane usługi do konkretnych rezerwacji oraz pasażerów kożystających z tych udogodnień
-- Reservations passengers - przypisani pasażerowie do konkretnych rezerwacji
-- Boarding pass - reprezentacja karty pokładowej, przechowywane informacje typu: imię i nazwisko pasażera, data i miejsce przylotu i odlotu, lokalizacja miejsca
+# Project topic: Airline Handling System
+## Database Models
+### Conceptual Model
+Entity description:
+- Time Zone - dictionary of available time zones with code and UTC offset
+- Country - representation of countries, each country assigned to a time zone
+- City - representation of cities, each city assigned to a country
+- Airports - representation of airports with their codes, each airport assigned to a city
+- Routes - catalog of supported routes, defined connection between two airports
+- Flights - catalog of available flights, combination of a route and a plane, along with departure and arrival times and price
+- Airlines - catalog of airlines served by the system
+- Planes - representation of physical planes, parameters such as: number of seats, load capacity, fuel capacity
+- Seat type - dictionary storing available seat types (window, middle, aisle)
+- Class - dictionary storing possible classes (economy, business, etc.)
+- Seats - representation of each seat in each plane, represented by its own id and the plane's serial number, a defined row and column number
+- Currency - dictionary storing possible currencies
+- Reservations - the central point of purchase processes, linking a user to a specific flight, along with the number of purchased seats, at a given point in time
+- Extra services - catalog of available additional services along with their price, e.g. priority boarding
+- Luggage - a subtype of Extra services, a detailed specification of all baggage-related services with precise baggage parameters
+- Users - representation of system users, stores the user's account access data (email, password)
+- Passengers - representation of each flight passenger, stores travelers' personal data, among others first name, last name, phone number
+- Payment Status - dictionary of possible payment statuses, e.g. "pending", "completed" etc.
+- Payment - representation of payment transactions, linking a payment to a reservation at a given point in time, each has a status
+- Reservations extra services - services assigned to specific reservations and passengers using these amenities
+- Reservations passengers - passengers assigned to specific reservations
+- Boarding pass - representation of a boarding pass, stores information such as: passenger's first and last name, arrival/departure date and location, seat location
 
 <br>
 
-![Model pojęciowy](screeny/Logical.png)
+![Conceptual model](screeny/Logical.png)
 
 
-### Model relacyjny
-![Model relacyjny](screeny/Relational.png)
-Zastosowana denormalizacja:
-- Kolumny wyliczane
-1. Tabela Payments - dodanie kolumny `payment_amount`<br>
-Odpowiada za wyliczenie całkowitej ceny rezerwacji wraz z dodanymi usługami dodatkowymi.
-- Pre-join kluczy obcych
-1. Tabela Payments - dodanie klucza obcego do tabeli Currency<br>
-Ma na celu przyspieszyć wyświetlanie kwoty transakcji wraz z odpowiednią walutą.
-2. Tabela Flights - dodanie klucza obcego do tabeli Currency<br>
-Ma na celu przyspieszyć wyświetlanie ceny lotu wraz z odpowiednią walutą.
-3. Tabela Flights - dodanie klucza obcego do tabeli Airlines<br>
-Pomocne, ponieważ przy locie chcemy od razu wyświetlić też informację o linii lotniczej.
-- Pre-join atrybutów
-1. Tabela Boarding Pass - duplikowane atrybuty: `departure_airport_code, arrival_airport_code, flight_departure_time, passenger_first_name, passenger_last_name, seat_row, seat_col`<br>
-Odpowiada temu, że chcemy, aby karta pokładowa była niezmienna w czasie. Dane kart pokładowych są szybkiej wyświetlane i mamy informację o stanie danych z przeszłości, ponieważ w tym przypadku taki nas interesuje.
-2. Tabela Flights - pre-join atrybutu `seat_count` z tabeli Planes<br>
-Utworzone, żeby przyspieszyć porównywanie z kolumną `booked_seats`.
-- Kolumny agregujące
-1. Tabela Flights - dodana kolumna `booked_seats`<br>
-Pomocna do częstego odczytywania stopnia zapełnienia lotu - może być to przydatne, żeby nie doprowadzić do przepełnienia lotu.
-- Tabele agregujące
-1. Dodana tabela `Route_statistics`<br>
-Pozwala zagregować statystyki dotyczące ilości klientów i całkowitych przychodów z tras dla konkretnych lat oraz miesięcy. Przyjęta konwencja: dla year=0, month=0 zapisywana jest suma całkowita i dla month=0 - suma roczna.
+### Relational Model
+![Relational model](screeny/Relational.png)
+Denormalization applied:
+- Computed columns
+1. Payments table - addition of the `payment_amount` column<br>
+Responsible for calculating the total reservation price including added extra services.
+- Pre-joined foreign keys
+1. Payments table - addition of a foreign key to the Currency table<br>
+Meant to speed up displaying the transaction amount with the corresponding currency.
+2. Flights table - addition of a foreign key to the Currency table<br>
+Meant to speed up displaying the flight price with the corresponding currency.
+3. Flights table - addition of a foreign key to the Airlines table<br>
+Helpful because when displaying a flight we also want to immediately show the airline information.
+- Pre-joined attributes
+1. Boarding Pass table - duplicated attributes: `departure_airport_code, arrival_airport_code, flight_departure_time, passenger_first_name, passenger_last_name, seat_row, seat_col`<br>
+This corresponds to the fact that we want the boarding pass to remain unchanged over time. Boarding pass data is displayed quickly and we have information about the state of the data from the past, since in this case that's what interests us.
+2. Flights table - pre-joined `seat_count` attribute from the Planes table<br>
+Created to speed up comparison with the `booked_seats` column.
+- Aggregating columns
+1. Flights table - added `booked_seats` column<br>
+Helpful for frequently reading a flight's occupancy level - this can be useful to avoid overbooking a flight.
+- Aggregating tables
+1. Added `Route_statistics` table<br>
+Allows aggregating statistics regarding the number of customers and total revenue from routes for specific years and months. Adopted convention: for year=0, month=0 the total overall sum is stored, and for month=0 - the annual sum.
 
 <br>
 
-### Model fizyczny
-#### Dodane widoki
-1. Widoki części operacyjnej
-Znajdują się w pliku: [optimization.sql](./app-code/db/init/optimization.sql)
-* Widok `v_flight_search`
-    - zbiera dane często wykorzystywane do zapytania o loty w aplikacji
-    - nie jest zmaterializowany, ale zwiększa wydajność, bo możliwe jest zapamiętanie planu zapytania i optymalizacja jego wykonania
-    - wykorzystywany w funkcji `findSeatsByFlightId` w [FlightRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/FlightRepository.java)
-* Widok `v_seat_flights`
-    - zbiera informacje o siedzeniach w samolocie w celu stworzenia zestawienia zajętości miejsc wykorzystywanego w backendzie\
-    - wykorzystywany w funkcji `findFlights` w [FlightRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/FlightRepository.java)
+### Physical Model
+#### Added views
+1. Operational-part views
+Located in the file: [optimization.sql](./app-code/db/init/optimization.sql)
+* View `v_flight_search`
+    - collects data frequently used for querying flights in the application
+    - it is not materialized, but it increases performance because it is possible to remember the query plan and optimize its execution
+    - used in the `findSeatsByFlightId` function in [FlightRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/FlightRepository.java)
+* View `v_seat_flights`
+    - collects information about seats in a plane in order to create a seat-occupancy summary used in the backend
+    - used in the `findFlights` function in [FlightRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/FlightRepository.java)
 
-2. Widoki części analitycznej - szczegółowy opis w sekcji [Część analityczna](#część-analityczna--szczegółowy-opis)
+2. Analytics-part views - detailed description in the [Analytics part](#analytics-part--detailed-description) section
 
-#### Dodane indeksy
-Znajdują się w pliku: [optimization.sql](./app-code/db/init/optimization.sql)
-* Indeksy na kluczach głównych i wartościach unique (np. users.email_address, (routes.origin_airport_id, routes.dest_airport_id)) są tworzone automatycznie przez Oracle, co już poprawia wydajność większości wykorzystywanych zapytań
-* Indeksy na kluczach obcych - pozwalają przyspieszyć wykonanie złączeń
-* Na podstawie analizy często wykonywanych zapytań (dane z aplikacji):
+#### Added indexes
+Located in the file: [optimization.sql](./app-code/db/init/optimization.sql)
+* Indexes on primary keys and unique values (e.g. users.email_address, (routes.origin_airport_id, routes.dest_airport_id)) are created automatically by Oracle, which already improves the performance of most of the queries used
+* Indexes on foreign keys - help speed up the execution of joins
+* Based on an analysis of frequently executed queries (data from the application):
     - select a1_0.id,a1_0.airport_code,a1_0.airport_name,a1_0.city_id from airports a1_0 order by a1_0.airport_name
-        - dodany indeks na airports(airport_name), żeby przechowywać dane już posortowane
-    - Złączenie boarding_pass z reservations, seats, flights (po serial_number) w widoku v_flight_seats także można przyspieszyć indeksem na kombinację (reservations_id, seats_id, serial_number)
-    - Złączenie boarding_pass z użytkownikami można przyspieszyć zakładając indeks na kombinacji (passengers_id, reservations_id)
-    - Podczas wyszukiwania lotów w aplikacji filtrować można po: dacie odlotu, cenie (zakresowo), lotniskach przylotu i odlotu, dlatego utworzone są indeksy na kombinacjach tych wartości, przy czym:
-        - flight_date_price_idx obejmuje zarówno filtrowanie po kombinacji daty i ceny oraz samej daty
-        - Podobnie routes_origin_dest_idx i routes_dest_idx obejmuje filtrowanie po kombinacji lotnisk, jak i samego lotniska wylotu
-* Indeksy analityczne - szczegółowy opis w sekcji [Część analityczna](#indeksy-analityczne)
+        - added an index on airports(airport_name), to keep the data already sorted
+    - The join of boarding_pass with reservations, seats, flights (by serial_number) in the v_flight_seats view can also be sped up with an index on the combination (reservations_id, seats_id, serial_number)
+    - The join of boarding_pass with users can be sped up by creating an index on the combination (passengers_id, reservations_id)
+    - When searching for flights in the application, one can filter by: departure date, price (by range), departure and arrival airports, therefore indexes are created on combinations of these values, where:
+        - flight_date_price_idx covers both filtering by the combination of date and price, and by date alone
+        - Similarly, routes_origin_dest_idx and routes_dest_idx cover filtering by the combination of airports, as well as by the departure airport alone
+* Analytical indexes - detailed description in the [Analytics part](#analytical-indexes) section
 
-#### Dodane procedury składowane
-Znajdują się w pliku: [procedures.sql](./app-code/db/init/procedures.sql)
+#### Added stored procedures
+Located in the file: [procedures.sql](./app-code/db/init/procedures.sql)
 * `create_reservation`
-    - Tworzy nową rezerwację i przypisuje płatność o statusie “Pending”
-    - Do aplikacji zwraca id utworzonej rezerwacji
-    - Dane potrzebne do prejoinów są przygotowywane w aplikacji, więc zerowym kosztem możemy je przekazać i od razu przypisać do wiersza płatności (payment_amount, currency_code) pomijając wykorzystanie triggera (bo wartości nie są NULL)
-    - Wykorzystanie w: [ReservationService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/ReservationService.java)
+    - Creates a new reservation and assigns a payment with the "Pending" status
+    - Returns the id of the created reservation to the application
+    - The data needed for pre-joins is prepared in the application, so we can pass it at zero cost and immediately assign it to the payment row (payment_amount, currency_code), bypassing the use of a trigger (since the values are not NULL)
+    - Used in: [ReservationService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/ReservationService.java)
 * `add_passenger_and_boarding_pass`
-    - Dodaje pasażera do rezerwacji i przypisuje mu kartę pokładową
-    - Ponownie wykorzystujemy dane już przygotowane, żeby wypełnić atrybuty prejoinowane (serial_number, passenger_first_name, passenger_last_name, seat_row, seat_col)
-    - Wykorzystanie w: [ReservationService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/ReservationService.java)
+    - Adds a passenger to the reservation and assigns them a boarding pass
+    - Again, we reuse already-prepared data to fill in the pre-joined attributes (serial_number, passenger_first_name, passenger_last_name, seat_row, seat_col)
+    - Used in: [ReservationService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/ReservationService.java)
 * `cancel_reservation`
-    - Anuluje rezerwację (jeśli to możliwe), aktualizując status płatności i usuwając wygenerowaną kartę pokładową, nieistotne już dane dotyczące pasażerów oraz dodatkowych udogodnień (żeby nie zaburzały analiz)
-    - Wykorzystanie w: [ReservationService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/ReservationService.java)
+    - Cancels a reservation (if possible), updating the payment status and removing the generated boarding pass and now-irrelevant data regarding passengers and extra amenities (so they do not skew the analytics)
+    - Used in: [ReservationService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/ReservationService.java)
 * `pay_for_reservation`
-    - Realizacja płatności jako ustawienie status płatności na “Completed”
-    - Wykorzystanie w: [ReservationService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/ReservationService.java)
-* Procedury analityczne (`get_occupancy`, `get_route_seasonality`) - szczegółowy opis w sekcji [Część analityczna](#procedury-składowane-analityczne-stored-procedures)
+    - Processes the payment by setting the payment status to "Completed"
+    - Used in: [ReservationService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/ReservationService.java)
+* Analytical procedures (`get_occupancy`, `get_route_seasonality`) - detailed description in the [Analytics part](#analytical-stored-procedures) section
 
-#### Dodane wyzwalacze
-Znajdują się w pliku: [denormalization.sql](./app-code/db/init/denormalization.sql) <br>
-Część została już opisana wyżej jako mechanizmy zapewniające spójność danych po denormalizacji. Wyzwalacze analityczne opisane są w sekcji [Część analityczna](#wyzwalacze-analityczne-triggers). Pozostałe:
+#### Added triggers
+Located in the file: [denormalization.sql](./app-code/db/init/denormalization.sql) <br>
+Some have already been described above as mechanisms ensuring data consistency after denormalization. Analytical triggers are described in the [Analytics part](#analytical-triggers) section. Remaining ones:
 * `planes_create_seats`
-    - Wyzwalacz pozwalający na automatyczne przypisanie miejsc i ich ustawienia do samolotu
+    - A trigger that allows automatic assignment of seats and their configuration to a plane
 
 ---
 
-## Część analityczna
+## Analytics Part
 
-Moduł analityczny dostarcza dashboardowe zestawienia i raporty na temat obłożenia lotów, sezonowości tras, przychodów, rankingu linii lotniczych i rozkładu cen. Architektura oparta jest na warstwowym przepływie danych:
+The analytics module provides dashboard summaries and reports on flight occupancy, route seasonality, revenue, airline ranking, and price distribution. The architecture is based on a layered data flow:
 
 ```
-Oracle DB  ─→  Widoki analityczne + Tabela agregująca (route_statistics)
+Oracle DB  ─→  Analytical views + Aggregating table (route_statistics)
                           │
-           Procedury składowane (get_occupancy, get_route_seasonality)
+           Stored procedures (get_occupancy, get_route_seasonality)
                           │
            Spring Boot (AnalyticsRepository → AnalyticsService → AnalyticsController)
                           │
               REST API  (/api/analytics/*)
                           │
-           Frontend React (AnalyticsDashboard + wykresy Chart.js)
+           React Frontend (AnalyticsDashboard + Chart.js charts)
 ```
 
-### Widoki analityczne (Views)
+### Analytical Views (Views)
 
-Znajdują się w pliku: [04_analytics_views.sql](./app-code/db/init/04_analytics_views.sql)
+Located in the file: [04_analytics_views.sql](./app-code/db/init/04_analytics_views.sql)
 
-Wszystkie widoki są **niezmaterializowane** - Oracle może ponownie wykorzystać zapamiętane plany wykonania, co redukuje czas parsowania zapytań. Uzupełnione są o indeksy function-based (opisane w sekcji indeksów), które przyspieszają filtrowanie po kolumnach wyliczanych.
+All views are **non-materialized** - Oracle can reuse cached execution plans, which reduces query parsing time. They are supplemented with function-based indexes (described in the indexes section), which speed up filtering on computed columns.
 
-#### 1. `v_flight_occupancy` - obłożenie lotów
-- **Cel**: Oblicza procentowe obłożenie każdego lotu (`occupancy_pct = booked_seats / total_seats × 100`).
-- **Złączenia**: `flights` → `routes` → `airports` (origin, dest) + `airlines` + `planes`
-- **Kolumny wyliczane**:
-  - `booked_seats` - wykorzystuje zdenormalizowaną kolumnę `flights.booked_seats_count` (utrzymywaną przez triggery)
-  - `total_seats` - `NVL(f.p_seat_count, p.seat_count)`, pre-joinowany atrybut
+#### 1. `v_flight_occupancy` - flight occupancy
+- **Purpose**: Calculates the percentage occupancy of each flight (`occupancy_pct = booked_seats / total_seats × 100`).
+- **Joins**: `flights` → `routes` → `airports` (origin, dest) + `airlines` + `planes`
+- **Computed columns**:
+  - `booked_seats` - uses the denormalized column `flights.booked_seats_count` (maintained by triggers)
+  - `total_seats` - `NVL(f.p_seat_count, p.seat_count)`, pre-joined attribute
   - `dep_year`, `dep_month` - `EXTRACT(YEAR/MONTH FROM CAST(departure_date_time AS DATE))`
-- **Wykorzystanie**:
-  - procedura `get_occupancy` - filtrowane dane szczegółowe
-  - `findOccupancySummary()` w [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java) - agregacja per linia lotnicza
-  - `findKpiSummary()` - średnie obłożenie dla dashboardu KPI
+- **Usage**:
+  - `get_occupancy` procedure - filtered detailed data
+  - `findOccupancySummary()` in [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java) - aggregation per airline
+  - `findKpiSummary()` - average occupancy for the KPI dashboard
 
-#### 2. `v_route_seasonality` - sezonowość tras
-- **Cel**: Agreguje liczbę lotów, pasażerów, średnie obłożenie i średnią cenę per trasa per miesiąc.
-- **Złączenia**: `flights` → `routes` → `airports` → `city` (origin, dest) + `planes`
-- **Grupowanie**: po trasie (`r.id`), kodach lotnisk, miastach, roku i miesiącu odlotu, walucie
-- **Kolumny agregujące**: `total_flights`, `total_passengers`, `avg_occupancy_pct`, `avg_price`
-- **Rola**: Backup/weryfikacja dla tabeli agregującej `route_statistics` - widok liczy bezpośrednio z tabel bazowych
+#### 2. `v_route_seasonality` - route seasonality
+- **Purpose**: Aggregates the number of flights, passengers, average occupancy, and average price per route per month.
+- **Joins**: `flights` → `routes` → `airports` → `city` (origin, dest) + `planes`
+- **Grouping**: by route (`r.id`), airport codes, cities, departure year and month, currency
+- **Aggregating columns**: `total_flights`, `total_passengers`, `avg_occupancy_pct`, `avg_price`
+- **Role**: Backup/verification for the `route_statistics` aggregating table - the view computes directly from the base tables
 
-#### 3. `v_route_revenue` - przychody per trasa
-- **Cel**: Przychody z opłaconych rezerwacji per trasa per miesiąc.
-- **Filtr**: `payment_status_id = 2` (Completed) - uwzględnia tylko zrealizowane płatności
-- **Złączenia**: `payments` → `reservations` → `flights` → `routes` → `airports` → `city` + `airlines`
-- **Kolumny**: `total_payments`, `total_revenue` (`SUM` kwot płatności), `avg_payment`
-- **Uwaga**: kwota płatności brana z `payments.payment_amount` (kolumna wyliczana przez trigger `payment_calculation`) z fallbackiem na `flights.price × number_in_party`
+#### 3. `v_route_revenue` - revenue per route
+- **Purpose**: Revenue from paid reservations per route per month.
+- **Filter**: `payment_status_id = 2` (Completed) - only includes completed payments
+- **Joins**: `payments` → `reservations` → `flights` → `routes` → `airports` → `city` + `airlines`
+- **Columns**: `total_payments`, `total_revenue` (`SUM` of payment amounts), `avg_payment`
+- **Note**: the payment amount is taken from `payments.payment_amount` (a column computed by the `payment_calculation` trigger), with a fallback to `flights.price × number_in_party`
 
-#### 4. `v_airline_ranking` - ranking linii lotniczych
-- **Cel**: Ranking linii lotniczych po przychodach, obłożeniu i liczbie lotów.
-- **Złączenia**: `airlines` → `flights` → `planes` + `LEFT JOIN reservations` + `LEFT JOIN payments` (filtr `payment_status_id = 2`)
-- **Kolumny**: `total_flights` (`COUNT DISTINCT`), `total_passengers`, `avg_occupancy_pct`, `total_revenue`
-- **LEFT JOIN**: zapewnia, że linie lotnicze bez rezerwacji/płatności nie są pomijane
-- **Wykorzystanie**:
-  - `findAirlineRanking()` - pełny ranking
-  - `findKpiSummary()` - najlepsza linia lotnicza (top 1 po przychodach)
+#### 4. `v_airline_ranking` - airline ranking
+- **Purpose**: Ranking of airlines by revenue, occupancy, and number of flights.
+- **Joins**: `airlines` → `flights` → `planes` + `LEFT JOIN reservations` + `LEFT JOIN payments` (filter `payment_status_id = 2`)
+- **Columns**: `total_flights` (`COUNT DISTINCT`), `total_passengers`, `avg_occupancy_pct`, `total_revenue`
+- **LEFT JOIN**: ensures that airlines without reservations/payments are not omitted
+- **Usage**:
+  - `findAirlineRanking()` - full ranking
+  - `findKpiSummary()` - top airline (top 1 by revenue)
 
-#### 5. `v_price_distribution` - rozkład cen
-- **Cel**: Statystyki cenowe per trasa: minimum, maksimum, średnia, mediana.
-- **Złączenia**: `flights` → `routes` → `airports` (origin, dest)
-- **Kolumny**: `min_price`, `max_price`, `avg_price`, `median_price` (Oracle `MEDIAN()`), `flight_count`
-- **Wykorzystanie**: `findPriceDistribution()` w [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java)
-
----
-
-### Tabela agregująca `route_statistics`
-
-Zdefiniowana w [01_ddl.sql](./app-code/db/init/01_ddl.sql), utrzymywana automatycznie przez wyzwalacze.
-
-| Kolumna            | Opis                                                             |
-|--------------------|------------------------------------------------------------------|
-| `routes_id` (PK)   | Klucz obcy do `routes`                                           |
-| `year` (PK)        | Rok odlotu (0 = suma całkowita)                                  |
-| `month` (PK)       | Miesiąc odlotu (0 = suma roczna / całkowita)                     |
-| `total_passengers`  | Skumulowana liczba pasażerów                                     |
-| `total_revenue`     | Skumulowany przychód                                             |
-
-**Konwencja granulacji**:
-- `year = 0, month = 0` - statystyka **all-time** (suma całkowita po wszystkich okresach)
-- `year = RRRR, month = 0` - statystyka **roczna** (suma za dany rok)
-- `year = RRRR, month = MM` - statystyka **miesięczna** (dane za konkretny miesiąc)
-
-**Zapytania korzystające z tabeli**:
-- `findTopRoutes(limit)` - top trasy po `total_passengers` (filtr: `year=0, month=0`)
-- `findRouteRevenue(year)` - przychody per trasa per miesiąc (filtr: `year>0, month>0`)
-- `findKpiSummary()` - łączna liczba pasażerów i przychodów (filtr: `year=0, month=0`)
-- procedura `get_route_seasonality` - sezonowość z filtrami
+#### 5. `v_price_distribution` - price distribution
+- **Purpose**: Price statistics per route: minimum, maximum, average, median.
+- **Joins**: `flights` → `routes` → `airports` (origin, dest)
+- **Columns**: `min_price`, `max_price`, `avg_price`, `median_price` (Oracle `MEDIAN()`), `flight_count`
+- **Usage**: `findPriceDistribution()` in [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java)
 
 ---
 
-### Wyzwalacze analityczne (Triggers)
+### `route_statistics` Aggregating Table
 
-Znajdują się w pliku: [denormalization.sql](./app-code/db/init/denormalization.sql)
+Defined in [01_ddl.sql](./app-code/db/init/01_ddl.sql), maintained automatically by triggers.
 
-Poniższe wyzwalacze utrzymują spójność tabeli agregującej `route_statistics`, aktualizując ją automatycznie przy każdej operacji na rezerwacjach i płatnościach.
+| Column             | Description                                                      |
+|--------------------|--------------------------------------------------------------------|
+| `routes_id` (PK)   | Foreign key to `routes`                                            |
+| `year` (PK)        | Departure year (0 = total sum)                                     |
+| `month` (PK)       | Departure month (0 = annual / total sum)                           |
+| `total_passengers`  | Cumulative number of passengers                                   |
+| `total_revenue`     | Cumulative revenue                                                 |
+
+**Granularity convention**:
+- `year = 0, month = 0` - **all-time** statistic (total sum across all periods)
+- `year = YYYY, month = 0` - **annual** statistic (sum for the given year)
+- `year = YYYY, month = MM` - **monthly** statistic (data for a specific month)
+
+**Queries using the table**:
+- `findTopRoutes(limit)` - top routes by `total_passengers` (filter: `year=0, month=0`)
+- `findRouteRevenue(year)` - revenue per route per month (filter: `year>0, month>0`)
+- `findKpiSummary()` - total number of passengers and revenue (filter: `year=0, month=0`)
+- `get_route_seasonality` procedure - seasonality with filters
+
+---
+
+### Analytical Triggers (Triggers)
+
+Located in the file: [denormalization.sql](./app-code/db/init/denormalization.sql)
+
+The following triggers maintain the consistency of the `route_statistics` aggregating table, updating it automatically on every operation on reservations and payments.
 
 #### 1. `route_statistics_count_passengers_I`
-- **Zdarzenie**: `AFTER INSERT ON reservations_passengers`
-- **Działanie**: Inkrementuje `total_passengers` w trzech wierszach tabeli `route_statistics`:
-  1. Wiersz all-time (`year=0, month=0`)
-  2. Wiersz roczny (`year=RRRR, month=0`)
-  3. Wiersz miesięczny (`year=RRRR, month=MM`)
-- **Logika**: Na podstawie `reservations_id` odczytuje `routes_id` i `departure_date_time` z `flights`. Jeśli wiersz nie istnieje (INSERT na nowej trasie/okresie), jest tworzony z `total_passengers=1, total_revenue=0`.
-- **Technika**: Wzorzec `UPDATE → IF SQL%ROWCOUNT = 0 THEN INSERT` (upsert bez MERGE)
+- **Event**: `AFTER INSERT ON reservations_passengers`
+- **Action**: Increments `total_passengers` in three rows of the `route_statistics` table:
+  1. All-time row (`year=0, month=0`)
+  2. Annual row (`year=YYYY, month=0`)
+  3. Monthly row (`year=YYYY, month=MM`)
+- **Logic**: Based on `reservations_id`, reads `routes_id` and `departure_date_time` from `flights`. If the row does not exist (INSERT on a new route/period), it is created with `total_passengers=1, total_revenue=0`.
+- **Technique**: `UPDATE → IF SQL%ROWCOUNT = 0 THEN INSERT` pattern (upsert without MERGE)
 
 #### 2. `route_statistics_count_revenue_I`
-- **Zdarzenie**: `AFTER INSERT ON payments`
-- **Działanie**: Dodaje kwotę płatności (`payment_amount`) do `total_revenue` we wszystkich trzech granulacjach (all-time, roczna, miesięczna) jednym `UPDATE` z warunkiem `OR`.
-- **Uwaga**: Trigger działa na INSERT do `payments`, więc `payment_amount` jest już obliczona przez trigger `payment_calculation`.
+- **Event**: `AFTER INSERT ON payments`
+- **Action**: Adds the payment amount (`payment_amount`) to `total_revenue` across all three granularities (all-time, annual, monthly) in a single `UPDATE` with an `OR` condition.
+- **Note**: The trigger runs on INSERT into `payments`, so `payment_amount` has already been computed by the `payment_calculation` trigger.
 
 ---
 
-### Procedury składowane analityczne (Stored Procedures)
+### Analytical Stored Procedures
 
-Znajdują się w pliku: [procedures.sql](./app-code/db/init/procedures.sql)
+Located in the file: [procedures.sql](./app-code/db/init/procedures.sql)
 
-Procedury analityczne hermetyzują złożoną logikę filtrowania i eliminują dynamiczne budowanie SQL w Javie (zapobiegając SQL injection i zapewniając stabilniejsze plany wykonania).
+Analytical procedures encapsulate complex filtering logic and eliminate dynamic SQL construction in Java (preventing SQL injection and ensuring more stable execution plans).
 
 #### 1. `get_occupancy`
 
-| Parametr       | Typ             | Opis                                    |
-|----------------|-----------------|-----------------------------------------|
-| `p_airline_id` | `NUMBER` (IN)   | Filtr po linii lotniczej (NULL = brak)  |
-| `p_route_id`   | `NUMBER` (IN)   | Filtr po trasie (NULL = brak)           |
-| `p_year`       | `NUMBER` (IN)   | Filtr po roku odlotu (NULL = brak)      |
-| `p_month`      | `NUMBER` (IN)   | Filtr po miesiącu odlotu (NULL = brak)  |
-| `p_result`     | `SYS_REFCURSOR` (OUT) | Kursor z wynikami                  |
+| Parameter      | Type            | Description                              |
+|----------------|-----------------|-------------------------------------------|
+| `p_airline_id` | `NUMBER` (IN)   | Filter by airline (NULL = none)           |
+| `p_route_id`   | `NUMBER` (IN)   | Filter by route (NULL = none)             |
+| `p_year`       | `NUMBER` (IN)   | Filter by departure year (NULL = none)    |
+| `p_month`      | `NUMBER` (IN)   | Filter by departure month (NULL = none)   |
+| `p_result`     | `SYS_REFCURSOR` (OUT) | Cursor with results                |
 
-- **Źródło danych**: widok `v_flight_occupancy`
-- **Filtrowanie**: wzorzec `(param IS NULL OR kolumna = param)` - Oracle optymalizuje to do eliminacji predykatów, gdy parametr jest NULL
-- **Sortowanie**: `ORDER BY departure_date_time ASC`
-- **Wywołanie w Javie**: `SimpleJdbcCall` z `OracleTypes.CURSOR` w [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java)
+- **Data source**: `v_flight_occupancy` view
+- **Filtering**: `(param IS NULL OR column = param)` pattern - Oracle optimizes this to eliminate predicates when the parameter is NULL
+- **Sorting**: `ORDER BY departure_date_time ASC`
+- **Called from Java**: `SimpleJdbcCall` with `OracleTypes.CURSOR` in [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java)
 
 #### 2. `get_route_seasonality`
 
-| Parametr        | Typ              | Opis                                          |
-|-----------------|------------------|-----------------------------------------------|
-| `p_year`        | `NUMBER` (IN)    | Filtr po roku (NULL = wszystkie lata)         |
-| `p_origin_code` | `VARCHAR2` (IN)  | Filtr po kodzie lotniska origin (NULL = brak) |
-| `p_dest_code`   | `VARCHAR2` (IN)  | Filtr po kodzie lotniska dest (NULL = brak)   |
-| `p_result`      | `SYS_REFCURSOR` (OUT) | Kursor z wynikami                         |
+| Parameter        | Type              | Description                                    |
+|-----------------|------------------|--------------------------------------------------|
+| `p_year`        | `NUMBER` (IN)    | Filter by year (NULL = all years)                |
+| `p_origin_code` | `VARCHAR2` (IN)  | Filter by origin airport code (NULL = none)      |
+| `p_dest_code`   | `VARCHAR2` (IN)  | Filter by destination airport code (NULL = none) |
+| `p_result`      | `SYS_REFCURSOR` (OUT) | Cursor with results                         |
 
-- **Źródło danych**: tabela `route_statistics` złączona z `routes` → `airports` → `city`
-- **Filtrowanie**: `month > 0 AND year > 0` (pomija sumy roczne i all-time) + opcjonalne filtry
-- **Sortowanie**: `ORDER BY year ASC, month ASC, total_passengers DESC NULLS LAST`
-- **Wywołanie w Javie**: `SimpleJdbcCall` z `OracleTypes.CURSOR` w [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java)
-
----
-
-### Indeksy analityczne
-
-Znajdują się w pliku: [optimization.sql](./app-code/db/init/optimization.sql)
-
-| Indeks                        | Tabela / Wyrażenie                                                    | Cel                                                                   |
-|-------------------------------|-----------------------------------------------------------------------|-----------------------------------------------------------------------|
-| `flights_dep_year_idx`        | `EXTRACT(YEAR FROM CAST(departure_date_time AS DATE))`                | Function-based: przyspiesza filtrowanie po `dep_year` w `v_flight_occupancy` |
-| `flights_dep_month_idx`       | `EXTRACT(MONTH FROM CAST(departure_date_time AS DATE))`               | Function-based: przyspiesza filtrowanie po `dep_month` w `v_flight_occupancy` |
-| `rs_year_month_idx`           | `route_statistics(year, month)`                                       | Zapytania filtrujące tylko po `year`/`month` (bez `routes_id` z PK)   |
-| `rs_alltime_passengers_idx`   | `route_statistics(year, month, total_passengers DESC)`                 | Covering index dla top routes (`WHERE year=0 AND month=0 ORDER BY total_passengers DESC`) |
-| `payments_status_idx`         | `payments(payment_status_id)`                                         | Filtrowanie `payment_status_id = 2` w `v_airline_ranking` i `v_route_revenue` |
+- **Data source**: `route_statistics` table joined with `routes` → `airports` → `city`
+- **Filtering**: `month > 0 AND year > 0` (skips annual and all-time sums) + optional filters
+- **Sorting**: `ORDER BY year ASC, month ASC, total_passengers DESC NULLS LAST`
+- **Called from Java**: `SimpleJdbcCall` with `OracleTypes.CURSOR` in [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java)
 
 ---
 
-### Warstwa aplikacyjna - REST API analityczne
+### Analytical Indexes
 
-Endpointy zdefiniowane w [AnalyticsController.java](./app-code/flights-app/src/main/java/com/example/flights_app/controller/AnalyticsController.java), logika biznesowa w [AnalyticsService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/AnalyticsService.java), dostęp do danych w [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java).
+Located in the file: [optimization.sql](./app-code/db/init/optimization.sql)
 
-| Endpoint                          | Metoda | Parametry                                    | Źródło danych                     | DTO / Typ odpowiedzi     |
-|-----------------------------------|--------|----------------------------------------------|-----------------------------------|--------------------------|
-| `/api/analytics/kpi`              | GET    | -                                            | `route_statistics` + `v_flight_occupancy` + `v_airline_ranking` | `KpiSummaryDTO`          |
-| `/api/analytics/occupancy`        | GET    | `airlineId`, `routeId`, `year`, `month`      | procedura `get_occupancy`         | `List<OccupancyDTO>`     |
-| `/api/analytics/occupancy/summary`| GET    | -                                            | `v_flight_occupancy` (GROUP BY)   | `List<Map>`              |
-| `/api/analytics/routes/seasonality`| GET   | `year`, `originCode`, `destCode`             | procedura `get_route_seasonality` | `List<RoutePopularityDTO>` |
-| `/api/analytics/routes/top`       | GET    | `limit` (domyślnie 10)                       | `route_statistics` (all-time)     | `List<Map>`              |
-| `/api/analytics/routes/revenue`   | GET    | `year`                                       | `route_statistics` (miesięczne)   | `List<RouteRevenueDTO>`  |
-| `/api/analytics/airlines/ranking` | GET    | -                                            | `v_airline_ranking`               | `List<AirlineRankingDTO>` |
-| `/api/analytics/prices/distribution`| GET  | -                                            | `v_price_distribution`            | `List<PriceDistributionDTO>` |
-
-**Przepływ wywołania procedury** (na przykładzie occupancy):
-1. `AnalyticsController.getOccupancy()` przyjmuje parametry z query string
-2. `AnalyticsService.getOccupancy()` deleguje do repozytorium i mapuje wynik na DTO
-3. `AnalyticsRepository.findOccupancy()` wywołuje `SimpleJdbcCall` z nazwą procedury `get_occupancy`, przekazując parametry IN i odbierając `SYS_REFCURSOR` (OUT)
-4. Kursor jest automatycznie mapowany na `List<Map<String, Object>>` przez `RowMapper` zdefiniowany w konstruktorze repozytorium
+| Index                          | Table / Expression                                                     | Purpose                                                                    |
+|-------------------------------|-------------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| `flights_dep_year_idx`        | `EXTRACT(YEAR FROM CAST(departure_date_time AS DATE))`                  | Function-based: speeds up filtering by `dep_year` in `v_flight_occupancy`   |
+| `flights_dep_month_idx`       | `EXTRACT(MONTH FROM CAST(departure_date_time AS DATE))`                 | Function-based: speeds up filtering by `dep_month` in `v_flight_occupancy`  |
+| `rs_year_month_idx`           | `route_statistics(year, month)`                                         | Queries filtering only by `year`/`month` (without `routes_id` from the PK) |
+| `rs_alltime_passengers_idx`   | `route_statistics(year, month, total_passengers DESC)`                   | Covering index for top routes (`WHERE year=0 AND month=0 ORDER BY total_passengers DESC`) |
+| `payments_status_idx`         | `payments(payment_status_id)`                                           | Filtering `payment_status_id = 2` in `v_airline_ranking` and `v_route_revenue` |
 
 ---
 
-### Frontend - Dashboard analityczny
+### Application Layer - Analytical REST API
 
-Komponenty React znajdują się w katalogu `app-code/flights-frontend/src/components/analytics/`:
+Endpoints defined in [AnalyticsController.java](./app-code/flights-app/src/main/java/com/example/flights_app/controller/AnalyticsController.java), business logic in [AnalyticsService.java](./app-code/flights-app/src/main/java/com/example/flights_app/service/AnalyticsService.java), data access in [AnalyticsRepository.java](./app-code/flights-app/src/main/java/com/example/flights_app/repository/AnalyticsRepository.java).
 
-| Komponent                | Opis                                                                 |
+| Endpoint                          | Method | Parameters                                    | Data source                        | DTO / Response type      |
+|-----------------------------------|--------|------------------------------------------------|-------------------------------------|---------------------------|
+| `/api/analytics/kpi`              | GET    | -                                              | `route_statistics` + `v_flight_occupancy` + `v_airline_ranking` | `KpiSummaryDTO`          |
+| `/api/analytics/occupancy`        | GET    | `airlineId`, `routeId`, `year`, `month`        | `get_occupancy` procedure           | `List<OccupancyDTO>`     |
+| `/api/analytics/occupancy/summary`| GET    | -                                              | `v_flight_occupancy` (GROUP BY)     | `List<Map>`              |
+| `/api/analytics/routes/seasonality`| GET   | `year`, `originCode`, `destCode`               | `get_route_seasonality` procedure   | `List<RoutePopularityDTO>` |
+| `/api/analytics/routes/top`       | GET    | `limit` (default 10)                           | `route_statistics` (all-time)       | `List<Map>`              |
+| `/api/analytics/routes/revenue`   | GET    | `year`                                         | `route_statistics` (monthly)        | `List<RouteRevenueDTO>`  |
+| `/api/analytics/airlines/ranking` | GET    | -                                              | `v_airline_ranking`                 | `List<AirlineRankingDTO>` |
+| `/api/analytics/prices/distribution`| GET  | -                                              | `v_price_distribution`              | `List<PriceDistributionDTO>` |
+
+**Procedure call flow** (using occupancy as an example):
+1. `AnalyticsController.getOccupancy()` accepts parameters from the query string
+2. `AnalyticsService.getOccupancy()` delegates to the repository and maps the result to a DTO
+3. `AnalyticsRepository.findOccupancy()` invokes `SimpleJdbcCall` with the procedure name `get_occupancy`, passing IN parameters and receiving a `SYS_REFCURSOR` (OUT)
+4. The cursor is automatically mapped to a `List<Map<String, Object>>` by the `RowMapper` defined in the repository's constructor
+
+---
+
+### Frontend - Analytics Dashboard
+
+React components are located in the directory `app-code/flights-frontend/src/components/analytics/`:
+
+| Component                | Description                                                            |
 |--------------------------|----------------------------------------------------------------------|
-| `AnalyticsDashboard.jsx` | Główny kontener dashboardu, orkiestruje pozostałe komponenty         |
-| `KpiCards.jsx`           | Karty KPI: łączne loty, pasażerowie, przychody, obłożenie, top trasa |
-| `OccupancyChart.jsx`     | Wykres obłożenia lotów z filtrami (linia lotnicza, rok, miesiąc)     |
-| `SeasonalityChart.jsx`   | Wykres sezonowości tras (pasażerowie per miesiąc)                    |
-| `RevenueChart.jsx`       | Wykres przychodów per trasa per miesiąc                              |
-| `AirlineRankingChart.jsx`| Ranking linii lotniczych (wykres słupkowy)                           |
-| `PriceDistributionChart.jsx` | Rozkład cen per trasa (min/max/avg/mediana)                      |
+| `AnalyticsDashboard.jsx` | Main dashboard container, orchestrates the other components          |
+| `KpiCards.jsx`           | KPI cards: total flights, passengers, revenue, occupancy, top route  |
+| `OccupancyChart.jsx`     | Flight occupancy chart with filters (airline, year, month)           |
+| `SeasonalityChart.jsx`   | Route seasonality chart (passengers per month)                       |
+| `RevenueChart.jsx`       | Revenue chart per route per month                                    |
+| `AirlineRankingChart.jsx`| Airline ranking (bar chart)                                          |
+| `PriceDistributionChart.jsx` | Price distribution per route (min/max/avg/median)                |
 
-Komunikacja z backendem odbywa się przez [analyticsApi.js](./app-code/flights-frontend/src/analyticsApi.js), który korzysta z endpointów REST opisanych powyżej.
+Communication with the backend takes place through [analyticsApi.js](./app-code/flights-frontend/src/analyticsApi.js), which uses the REST endpoints described above.
 
 ### USERS:
-dla przetestowania działania aplikacji należy logowac się na podanych userów:
-1. ADMIN - email: anna.nowak@email.pl - hasło: Haslo5678
-2. USER - email: piotr.wisniewski@email.pl - hasło: Secure99!
+To test the application's operation, log in using the following users:
+1. ADMIN - email: anna.nowak@email.pl - password: Haslo5678
+2. USER - email: piotr.wisniewski@email.pl - password: Secure99!
